@@ -1,14 +1,9 @@
-ext {
-    VERSION_NAME = simpleReleaseVersionName()
-    VERSION_CODE = commitCount()
-    CANONICAL_VERSION_NAME = canonicalReleaseVersionName()
-    BRANCH_NAME = branchName()
-    COMMIT_HASH = commitHash()
-}
-
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.getkeepsafe.dexcount'
+
 
 android {
 
@@ -16,23 +11,25 @@ android {
     buildToolsVersion buildToolsVer
 
     defaultConfig {
-        applicationId APPLICATION_ID
-        multiDexEnabled true
 
-        minSdkVersion 21
+        minSdkVersion minSdkVer
         targetSdkVersion targetSdkVer
-        versionCode VERSION_CODE
-        versionName VERSION_NAME
-        vectorDrawables.useSupportLibrary = true
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
     }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
-    // region compile options
+
+    // region java compiler flags
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -41,7 +38,7 @@ android {
 
     // endregion
 
-    // region lint options https://developer.android.com/studio/write/lint#gradle
+    // region lint options
 
     lintOptions {
         disable 'InvalidPackage'
@@ -50,9 +47,6 @@ android {
         checkReleaseBuilds false
         ignoreWarnings true       // false by default
         quiet true                // false by default
-        ignoreTestSources true
-        checkDependencies true
-        tasks.lint.enabled = false
     }
 
     // endregion
@@ -62,6 +56,14 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
         maxProcessCount 8
+    }
+
+    // endregion
+
+    // region adb options
+
+    adbOptions {
+        timeOutInMs 10 * 60 * 1000 // 10 minutes
     }
 
     // endregion
@@ -78,23 +80,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation libs.supportMultidex
     implementation libs.kotlinJdk8
-
-    implementation libs.supportAppCompat
-    implementation libs.appCompatResources
-    implementation libs.androidKtxCore
-    implementation libs.activityKtx
-    implementation libs.fragmentKtx
-    implementation libs.supportDesign
-    implementation libs.constraintLayout2
-    implementation libs.supportAnnotations
-    implementation libs.supportVectorDrawable
-
-    implementation project(':geofencer')
 }
-
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'

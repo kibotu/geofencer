@@ -1,2 +1,3 @@
 rootProject.name='Geofencer Demo'
 include ':app'
+include ':geofencer'
