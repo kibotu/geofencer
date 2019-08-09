@@ -1,0 +1,86 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+
+    compileSdkVersion compileSdkVer
+    buildToolsVersion buildToolsVer
+
+    defaultConfig {
+        applicationId APPLICATION_ID
+        multiDexEnabled true
+
+        minSdkVersion 21
+        targetSdkVersion targetSdkVer
+        versionCode VERSION_CODE
+        versionName VERSION_NAME
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // region compile options
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // endregion
+
+    // region lint options https://developer.android.com/studio/write/lint#gradle
+
+    lintOptions {
+        disable 'InvalidPackage'
+        abortOnError false        // true by default
+        checkAllWarnings false
+        checkReleaseBuilds false
+        ignoreWarnings true       // false by default
+        quiet true                // false by default
+        ignoreTestSources true
+        checkDependencies true
+        tasks.lint.enabled = false
+    }
+
+    // endregion
+
+    // region dex options
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+        maxProcessCount 8
+    }
+
+    // endregion
+
+    // region exclude duplicated meta inf files
+
+    packagingOptions {
+        exclude 'META-INF/library-core_release.kotlin_module'
+        exclude 'META-INF/lib_release.kotlin_module'
+    }
+
+    // endregion
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation libs.supportMultidex
+    implementation libs.kotlinJdk8
+
+    implementation libs.supportAppCompat
+    implementation libs.appCompatResources
+    implementation libs.androidKtxCore
+    implementation libs.activityKtx
+    implementation libs.fragmentKtx
+    implementation libs.supportDesign
+    implementation libs.constraintLayout2
+    implementation libs.supportAnnotations
+    implementation libs.supportVectorDrawable
+}
