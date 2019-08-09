@@ -1,3 +1,5 @@
+import java.security.spec.InvalidKeySpecException
+
 ext {
     VERSION_NAME = simpleReleaseVersionName()
     VERSION_CODE = commitCount()
@@ -25,10 +27,44 @@ android {
         versionName VERSION_NAME
         vectorDrawables.useSupportLibrary = true
     }
+
+    signingConfigs {
+        try {
+            debug {
+                storeFile file(DEBUG_KEYSYORE_PATH)
+                storePassword DEBUG_STORE_PASSWORD
+                keyAlias DEBUG_KEYSTORE_ALLIAS
+                keyPassword DEBUG_KEY_PASSWORD
+            }
+        }
+        catch (final ignored) {
+            throw new InvalidKeySpecException('You should define DEBUG_KEYSTORE_ALLIAS, DEBUG_STORE_PASSWORD, DEBUG_KEY_PASSWORD in gradle.properties.')
+        }
+        try {
+            release {
+                storeFile file(RELEASE_KEYSYORE_PATH)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEYSTORE_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        } catch (final ignored) {
+            throw new InvalidKeySpecException('You should define RELEASE_KEYSTORE_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD in gradle.properties.')
+        }
+    }
+
     buildTypes {
-        release {
+        debug {
+            signingConfig signingConfigs.debug
+            pseudoLocalesEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            shrinkResources = false
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -92,7 +128,25 @@ dependencies {
     implementation libs.supportAnnotations
     implementation libs.supportVectorDrawable
 
+    implementation libs.androidKtxNavigationCommon
+    implementation libs.androidKtxNavigationFragment
+    implementation libs.androidKtxNavigationUi
+    implementation libs.androidKtxNavigationRuntime
+
     implementation project(':geofencer')
+
+    implementation libs.exozetCore
+
+    implementation libs.playServicesMaps
+
+    implementation libs.rx2java
+    implementation libs.rx2Android
+    implementation libs.rx2Kotlin
+
+    implementation libs.rxpermissions
+    implementation libs.logger
+
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
 }
 
 

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "803641814265",
+    "firebase_url": "https://geofencer-80212.firebaseio.com",
+    "project_id": "geofencer-80212",
+    "storage_bucket": "geofencer-80212.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803641814265:android:ae59665d4d8ffca3",
+        "android_client_info": {
+          "package_name": "com.sprotte.geofencer.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "803641814265-2kpnk0ochjrl3cgugkv8gbe700f60g0t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sprotte.geofencer.demo",
+            "certificate_hash": "ae98a892e282182458bb7d2d3d366d13381f0801"
+          }
+        },
+        {
+          "client_id": "803641814265-eel2d7cn6gka3jcp3og6n6c44bjobka1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGn7d0iulunZkWMmnkJohxrha_ZTeOqqM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "803641814265-eel2d7cn6gka3jcp3og6n6c44bjobka1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
