@@ -30,7 +30,45 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
     private lateinit var locationManager: LocationManager
 
+    override fun subscribeUi() {
+        super.subscribeUi()
 
+        locationManager = application?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+
+
+        mapFragment.getMapAsync { map ->
+
+            this.map = map
+
+            logv { "map = $map" }
+
+            requestLocationPermission {
+                map.isMyLocationEnabled = it.granted
+
+                val bestProvider = locationManager.getBestProvider(Criteria(), false)
+                if (it.granted) {
+                    @SuppressLint("MissingPermission")
+                    val location = locationManager.getLastKnownLocation(bestProvider)
+                    if (location != null) {
+                        val latLng = LatLng(location.latitude, location.longitude)
+                        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                    }
+                }
+
+
+            }
+
+            onMapReady(map)
+        }
+
+    }
+
+    override fun unsubscribeUi() {
+        super.unsubscribeUi()
+        map = null
+    }
 
     fun onMapReady(googleMap: GoogleMap) {
 
