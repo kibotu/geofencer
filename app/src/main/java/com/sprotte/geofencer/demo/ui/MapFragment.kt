@@ -7,6 +7,7 @@ import android.location.Criteria
 import android.location.LocationManager
 import android.net.wifi.WifiManager
 import android.util.Log
+import android.view.View
 import androidx.core.content.ContextCompat.getSystemService
 import com.exozet.android.core.base.BaseFragment
 import com.github.florent37.application.provider.application
@@ -20,6 +21,7 @@ import com.sprotte.geofencer.demo.R
 import com.tbruyelle.rxpermissions2.Permission
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxkotlin.addTo
+import kotlinx.android.synthetic.main.fragment_map.*
 import net.kibotu.logger.Logger.logv
 
 class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
@@ -33,10 +35,23 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     override fun subscribeUi() {
         super.subscribeUi()
 
+        newReminder.visibility = View.GONE
+        currentLocation.visibility = View.GONE
+
         locationManager = application?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
+
+        currentLocation.setOnClickListener {
+            val bestProvider = locationManager.getBestProvider(Criteria(), false)
+            @SuppressLint("MissingPermission")
+            val location = locationManager.getLastKnownLocation(bestProvider)
+            if (location != null) {
+                val latLng = LatLng(location.latitude, location.longitude)
+                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+            }
+        }
 
         mapFragment.getMapAsync { map ->
 
@@ -49,6 +64,10 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
                 val bestProvider = locationManager.getBestProvider(Criteria(), false)
                 if (it.granted) {
+
+                    newReminder.visibility = View.VISIBLE
+                    currentLocation.visibility = View.VISIBLE
+
                     @SuppressLint("MissingPermission")
                     val location = locationManager.getLastKnownLocation(bestProvider)
                     if (location != null) {
