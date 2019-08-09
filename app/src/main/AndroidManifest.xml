@@ -21,13 +21,15 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".ui.MainActivity">
+
+            <nav-graph android:value="@navigation/navigation_controller" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <nav-graph android:value="@navigation/navigation_controller" />
         </activity>
     </application>
 
