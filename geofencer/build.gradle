@@ -81,6 +81,8 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation libs.kotlinJdk8
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.github.exozet:AndroidCore:2.2.8'
 }
 
 configurations.all {

@@ -2,27 +2,35 @@ package com.sprotte.geofencer.demo.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.location.Criteria
 import android.location.LocationManager
-import android.net.wifi.WifiManager
 import android.util.Log
 import android.view.View
-import androidx.core.content.ContextCompat.getSystemService
+import android.widget.SeekBar
 import com.exozet.android.core.base.BaseFragment
 import com.github.florent37.application.provider.application
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.material.snackbar.Snackbar
+import com.sprotte.geofencer.Geofencer
 import com.sprotte.geofencer.demo.R
+import com.sprotte.geofencer.demo.hideKeyboard
+import com.sprotte.geofencer.demo.requestFocusWithKeyboard
+import com.sprotte.geofencer.demo.showGeofenceInMap
+import com.sprotte.geofencer.models.Geofence
 import com.tbruyelle.rxpermissions2.Permission
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_map.*
-import net.kibotu.logger.Logger.logv
+import kotlin.math.roundToInt
+
+import android.location.Location
+
 
 class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
@@ -31,6 +39,8 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     private var map: GoogleMap? = null
 
     private lateinit var locationManager: LocationManager
+
+    private var geofence = Geofence()
 
     override fun subscribeUi() {
         super.subscribeUi()
@@ -42,7 +52,6 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
-
         currentLocation.setOnClickListener {
             val bestProvider = locationManager.getBestProvider(Criteria(), false)
             @SuppressLint("MissingPermission")
@@ -53,35 +62,30 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             }
         }
 
+        newReminder.setOnClickListener {
+            showConfigureLocationStep()
+        }
+
         mapFragment.getMapAsync { map ->
-
             this.map = map
-
-            logv { "map = $map" }
-
             requestLocationPermission {
+
                 map.isMyLocationEnabled = it.granted
 
-                val bestProvider = locationManager.getBestProvider(Criteria(), false)
                 if (it.granted) {
-
                     newReminder.visibility = View.VISIBLE
                     currentLocation.visibility = View.VISIBLE
-
                     @SuppressLint("MissingPermission")
-                    val location = locationManager.getLastKnownLocation(bestProvider)
+                    val location = getLastKnownLocation()
                     if (location != null) {
                         val latLng = LatLng(location.latitude, location.longitude)
                         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                     }
+                    showGeofences()
                 }
-
-
             }
-
             onMapReady(map)
         }
-
     }
 
     override fun unsubscribeUi() {
@@ -98,11 +102,6 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
-    override fun onMarkerClick(p0: Marker?): Boolean {
-        return false
-    }
-
-
     fun requestLocationPermission(block: (permission: Permission) -> Unit) = RxPermissions(this)
         .requestEachCombined(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -114,5 +113,160 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             Log.v("sasd", "location permission $it")
         })
         .addTo(subscription)
+
+    @SuppressLint("MissingPermission")
+    private fun addGeofence(geofence: Geofence) {
+        requestLocationPermission {
+            if (it.granted) {
+                Geofencer(requireContext())
+                    .addGeofence(geofence, GeoFenceIntentService::class.java) {
+                        container.visibility = View.GONE
+                        showGeofences()
+                    }
+            }
+
+        }
+    }
+
+    private fun showGeofenceUpdate() {
+        map?.clear()
+        showGeofenceInMap(context!!, map!!, geofence)
+    }
+
+    private fun showGeofences() {
+        map?.run {
+            clear()
+            for (geofence in Geofencer(requireContext()).getAll()) {
+                showGeofenceInMap(context!!, this, geofence)
+            }
+        }
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        val geofence = Geofencer(requireContext()).get(marker.tag as String)
+        if (geofence != null) {
+            showGeofenceRemoveAlert(geofence)
+        }
+        return true
+    }
+
+    private fun showGeofenceRemoveAlert(geofence: Geofence) {
+        val alertDialog = AlertDialog.Builder(context!!).create()
+        alertDialog.run {
+            setMessage(getString(R.string.reminder_removal_alert))
+            setButton(
+                AlertDialog.BUTTON_POSITIVE,
+                getString(R.string.reminder_removal_alert_positive)
+            ) { dialog, _ ->
+                removeGeofence(geofence)
+                dialog.dismiss()
+            }
+            setButton(
+                AlertDialog.BUTTON_NEGATIVE,
+                getString(R.string.reminder_removal_alert_negative)
+            ) { dialog, _ ->
+                dialog.dismiss()
+            }
+            show()
+        }
+    }
+
+    private fun removeGeofence(geofence: Geofence) {
+        Geofencer(requireContext()).removeGeofence(geofence.id){
+            showGeofences()
+            Snackbar.make(main, R.string.reminder_removed_success, Snackbar.LENGTH_LONG)
+                .show()
+        }
+    }
+
+    private fun showConfigureLocationStep() {
+        container.visibility = View.VISIBLE
+        marker.visibility = View.VISIBLE
+        instructionTitle.visibility = View.VISIBLE
+        instructionSubtitle.visibility = View.VISIBLE
+        radiusBar.visibility = View.GONE
+        radiusDescription.visibility = View.GONE
+        message.visibility = View.GONE
+        instructionTitle.text = getString(R.string.instruction_where_description)
+        next.setOnClickListener {
+            geofence.latitude = map?.cameraPosition?.target?.latitude ?: 0.0
+            geofence.longitude = map?.cameraPosition?.target?.longitude ?: 0.0
+            showConfigureRadiusStep()
+        }
+        showGeofenceUpdate()
+    }
+
+    private fun showConfigureRadiusStep() {
+        marker.visibility = View.GONE
+        instructionTitle.visibility = View.VISIBLE
+        instructionSubtitle.visibility = View.GONE
+        radiusBar.visibility = View.VISIBLE
+        radiusDescription.visibility = View.VISIBLE
+        message.visibility = View.GONE
+        instructionTitle.text = getString(R.string.instruction_radius_description)
+        next.setOnClickListener {
+            showConfigureMessageStep()
+        }
+        radiusBar.setOnSeekBarChangeListener(radiusBarChangeListener)
+        updateRadiusWithProgress(radiusBar.progress)
+        map?.animateCamera(CameraUpdateFactory.zoomTo(15f))
+        showGeofenceUpdate()
+    }
+
+    private fun showConfigureMessageStep() {
+        marker.visibility = View.GONE
+        instructionTitle.visibility = View.VISIBLE
+        instructionSubtitle.visibility = View.GONE
+        radiusBar.visibility = View.GONE
+        radiusDescription.visibility = View.GONE
+        message.visibility = View.VISIBLE
+        instructionTitle.text = getString(R.string.instruction_message_description)
+        next.setOnClickListener {
+            hideKeyboard(context!!, message)
+            geofence.message = message.text.toString()
+
+            if (geofence.message.isNullOrEmpty()) {
+                message.error = getString(R.string.error_required)
+            } else {
+                addGeofence(geofence)
+            }
+        }
+        message.requestFocusWithKeyboard()
+        showGeofenceUpdate()
+    }
+
+    private fun getRadius(progress: Int) = 100 + (2 * progress.toDouble() + 1) * 100
+
+    private val radiusBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            updateRadiusWithProgress(progress)
+
+            showGeofenceUpdate()
+        }
+    }
+
+    private fun updateRadiusWithProgress(progress: Int) {
+        val radius = getRadius(progress)
+        geofence.radius = radius
+        radiusDescription.text =
+            getString(R.string.radius_description, radius.roundToInt().toString())
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getLastKnownLocation(): Location? {
+        val providers = locationManager.getProviders(true)
+        var bestLocation: Location? = null
+        for (provider in providers) {
+            val l = locationManager.getLastKnownLocation(provider) ?: continue
+            if (bestLocation == null || l.getAccuracy() < bestLocation!!.getAccuracy()) {
+                bestLocation = l
+            }
+        }
+        return bestLocation
+    }
 }
 
