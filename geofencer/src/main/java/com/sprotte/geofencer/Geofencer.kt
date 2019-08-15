@@ -22,7 +22,7 @@ class Geofencer(context: Context) {
         intent: Class<T>,
         crossinline success: () -> Unit
     ) {
-        geofence.intentClassName = intent::class.java.canonicalName!!
+        geofence.intentClassName = intent.canonicalName!!
         repository.add(geofence){
             success()
         }

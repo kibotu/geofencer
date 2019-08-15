@@ -83,6 +83,8 @@ dependencies {
     implementation libs.kotlinJdk8
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.github.exozet:AndroidCore:2.2.8'
+    compile "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 configurations.all {
@@ -90,3 +92,9 @@ configurations.all {
 
     resolutionStrategy.force libs.kotlinJdk8
 }
+
+repositories {
+    mavenCentral()
+}
+
+apply from: "${project.rootDir}/Android-Dependencies/bintray.gradle"

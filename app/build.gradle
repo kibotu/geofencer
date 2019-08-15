@@ -147,6 +147,8 @@ dependencies {
     implementation libs.logger
 
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+    compile "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 
@@ -154,4 +156,7 @@ configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
 
     resolutionStrategy.force libs.kotlinJdk8
+}
+repositories {
+    mavenCentral()
 }

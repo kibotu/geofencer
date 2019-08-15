@@ -3,7 +3,7 @@
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyDGn7d0iulunZkWMmnkJohxrha_ZTeOqqM</string>
 
 
-    <string name="instruction_where_description">Where do you want to be reminded?</string>
+    <string name="instruction_where_description">Where do you want to add a geofence?</string>
     <string name="instruction_where_subtitle_description">Drag the map to set the location</string>
     <string name="instruction_radius_description">Choose the radius</string>
     <string name="instruction_message_description">Enter the message</string>
@@ -12,12 +12,12 @@
     <string name="message_hint">We arrived! :]</string>
     <string name="radius_description">%1$s meters</string>
 
-    <string name="reminder_removal_alert">Remove reminder?</string>
+    <string name="reminder_removal_alert">Remove geofence?</string>
     <string name="reminder_removal_alert_positive">OK</string>
     <string name="reminder_removal_alert_negative">Cancel</string>
 
-    <string name="reminder_added_success">Reminder added!</string>
-    <string name="reminder_removed_success">Reminder removed!</string>
+    <string name="reminder_added_success">Geofence added!</string>
+    <string name="reminder_removed_success">Geofence removed!</string>
 
     <string name="marker_content_description">Marker</string>
 </resources>

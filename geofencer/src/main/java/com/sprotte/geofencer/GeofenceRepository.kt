@@ -78,6 +78,8 @@ class GeofenceRepository(private val context: Context) {
     private fun buildGeofence(geofence: Geofence): com.google.android.gms.location.Geofence {
         return Builder()
             .setRequestId(geofence.id)
+            .setLoiteringDelay(1)
+            .setNotificationResponsiveness(1)
             .setCircularRegion(
                 geofence.latitude,
                 geofence.longitude,

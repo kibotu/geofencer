@@ -10,6 +10,7 @@ buildscript {
         google()
         maven { url 'https://plugins.gradle.org/m2/' }
         maven { url 'https://maven.fabric.io/public' }
+        mavenCentral()
 
     }
     dependencies {
@@ -23,7 +24,9 @@ buildscript {
         classpath plugin.dexcountGradle
 
         classpath plugin.realm
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" }
+        classpath pluginLibrary.gradleBintrayPlugin
+
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" }
 }
 
 allprojects {
