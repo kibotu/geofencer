@@ -1,7 +1,9 @@
 package com.sprotte.geofencer
 
 import android.Manifest
+import android.app.IntentService
 import android.content.Context
+import android.content.Intent
 import androidx.annotation.RequiresPermission
 import androidx.core.app.JobIntentService
 import com.sprotte.geofencer.models.Geofence
@@ -17,7 +19,7 @@ class Geofencer(context: Context) {
     var repository = GeofenceRepository(context)
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    inline fun <reified T : JobIntentService> addGeofence(
+    inline fun <reified T : IntentService> addGeofence(
         geofence: Geofence,
         intent: Class<T>,
         crossinline success: () -> Unit
