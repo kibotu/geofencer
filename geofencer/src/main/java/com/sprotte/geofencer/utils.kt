@@ -8,7 +8,7 @@ import android.util.Log
 
 internal val debug = BuildConfig.DEBUG
 
-fun Any.log(message: String?) {
+internal fun Any.log(message: String?) {
     if (debug)
         Log.d(this::class.java.simpleName, "$message")
 }
