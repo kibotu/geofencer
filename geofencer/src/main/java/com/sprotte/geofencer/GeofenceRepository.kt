@@ -3,13 +3,14 @@ package com.sprotte.geofencer
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.exozet.android.core.gson.fromJson
-import com.exozet.android.core.gson.toJson
 import com.google.android.gms.location.LocationServices
-import com.exozet.android.core.storage.sharedPreference
 import com.google.android.gms.location.Geofence.*
 import com.google.android.gms.location.GeofencingRequest
 import com.sprotte.geofencer.models.Geofence
+import com.sprotte.geofencer.utils.fromJson
+import com.sprotte.geofencer.utils.loge
+import com.sprotte.geofencer.utils.sharedPreference
+import com.sprotte.geofencer.utils.toJson
 
 class GeofenceRepository(private val context: Context) {
 
@@ -26,7 +27,7 @@ class GeofenceRepository(private val context: Context) {
         )
     }
 
-    var geofenceString by sharedPreference(Geofencer.PREFS_NAME, "")
+    var geofenceString by context.sharedPreference(Geofencer.PREFS_NAME, "")
 
     fun add(
         geofence: Geofence,
@@ -40,7 +41,7 @@ class GeofenceRepository(private val context: Context) {
                 success()
             }
             .addOnFailureListener {
-                throw it
+                loge(it.message)
             }
     }
 
@@ -60,7 +61,7 @@ class GeofenceRepository(private val context: Context) {
                 success()
             }
             addOnFailureListener {
-                throw it
+                loge(it.message)
             }
         }
     }

@@ -3,12 +3,10 @@ package com.sprotte.geofencer
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
-import android.content.ComponentName
-import android.os.Bundle
 import androidx.core.app.JobIntentService
+import com.sprotte.geofencer.utils.log
 
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {

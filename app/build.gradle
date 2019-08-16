@@ -146,9 +146,8 @@ dependencies {
     implementation libs.rxpermissions
     implementation libs.logger
 
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
-    compile "androidx.core:core-ktx:+"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation libs.playServicesLocation
+    implementation libs.androidKtxCore
 }
 
 
