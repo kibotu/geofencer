@@ -48,8 +48,6 @@ captures/
 /.idea/workspace.xml
 /.idea/libraries
 
-# Keystore files
-*.jks
 
 
 # External native build folder generated in Android Studio 2.2 and later
