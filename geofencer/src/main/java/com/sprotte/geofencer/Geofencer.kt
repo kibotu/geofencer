@@ -1,7 +1,6 @@
 package com.sprotte.geofencer
 
 import android.Manifest
-import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
@@ -12,10 +11,10 @@ class Geofencer(context: Context) {
 
     companion object {
 
-        fun parseExtras(context : Context, intent: Intent): Geofence? {
+        fun parseExtras(context: Context, intent: Intent): Geofence? {
             val id = intent.extras?.getString(Geofencer.INTENT_EXTRAS_KEY)
-            if(id != null){
-              return Geofencer(context).get(id)
+            if (id != null) {
+                return Geofencer(context).get(id)
             }
 
             return null
@@ -29,13 +28,13 @@ class Geofencer(context: Context) {
     var repository = GeofenceRepository(context)
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    inline fun <reified T : IntentService> addGeofence(
+    inline fun <reified T : JobIntentService> addGeofence(
         geofence: Geofence,
         intent: Class<T>,
         crossinline success: () -> Unit
     ) {
         geofence.intentClassName = intent.canonicalName!!
-        repository.add(geofence){
+        repository.add(geofence) {
             success()
         }
     }

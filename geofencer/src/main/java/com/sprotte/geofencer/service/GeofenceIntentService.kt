@@ -1,16 +1,15 @@
 package com.sprotte.geofencer.service
 
-import android.app.IntentService
 import android.content.Intent
+import androidx.core.app.JobIntentService
 import com.sprotte.geofencer.Geofencer
 import com.sprotte.geofencer.models.Geofence
+import com.sprotte.geofencer.utils.log
 
-abstract class GeofenceIntentService : IntentService("GeofenceIntentService") {
+abstract class GeofenceIntentService : JobIntentService() {
 
-    override fun onHandleIntent(intent: Intent?) {
-        if (intent == null)
-            return
-
+    override fun onHandleWork(intent: Intent) {
+        log("onHandleWork $intent")
         val geofence =
             Geofencer.parseExtras(applicationContext, intent)
         if (geofence != null) {
