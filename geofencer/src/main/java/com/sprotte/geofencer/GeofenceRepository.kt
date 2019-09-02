@@ -7,6 +7,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Geofence.*
 import com.google.android.gms.location.GeofencingRequest
 import com.sprotte.geofencer.models.Geofence
+import com.sprotte.geofencer.service.GeofenceBroadcastReceiver
 import com.sprotte.geofencer.utils.fromJson
 import com.sprotte.geofencer.utils.loge
 import com.sprotte.geofencer.utils.sharedPreference
@@ -74,6 +75,15 @@ class GeofenceRepository(private val context: Context) {
         }
         val arrayOfReminders = geofenceString.fromJson<Array<Geofence>>()
         return arrayOfReminders.toList()
+    }
+
+    fun reAddAll(){
+        val geofences = getAll()
+        removeAll {
+            geofences.forEach {
+                add(it) {}
+            }
+        }
     }
 
     private fun buildGeofence(geofence: Geofence): com.google.android.gms.location.Geofence {

@@ -11,6 +11,16 @@ import com.sprotte.geofencer.models.Geofence
 class Geofencer(context: Context) {
 
     companion object {
+
+        fun parseExtras(context : Context, intent: Intent): Geofence? {
+            val id = intent.extras?.getString(Geofencer.INTENT_EXTRAS_KEY)
+            if(id != null){
+              return Geofencer(context).get(id)
+            }
+
+            return null
+        }
+
         const val PREFS_NAME = "GeofenceRepository"
         const val REQUEST_CODE = 5999
         const val INTENT_EXTRAS_KEY = "geofencesId"
@@ -51,4 +61,5 @@ class Geofencer(context: Context) {
     fun getAll(): List<Geofence> {
         return repository.getAll()
     }
+
 }

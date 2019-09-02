@@ -118,8 +118,9 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     private fun addGeofence(geofence: Geofence) {
         requestLocationPermission {
             if (it.granted) {
+
                 Geofencer(requireContext())
-                    .addGeofence(geofence, GeoFenceIntentService::class.java) {
+                    .addGeofence(geofence, AppGeofenceService::class.java) {
                         container.visibility = View.GONE
                         showGeofences()
                     }
