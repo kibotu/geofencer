@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.location.Criteria
+import android.location.Location
 import android.location.LocationManager
 import android.util.Log
 import android.view.View
@@ -28,8 +29,6 @@ import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlin.math.roundToInt
-
-import android.location.Location
 
 
 class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
@@ -118,7 +117,6 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     private fun addGeofence(geofence: Geofence) {
         requestLocationPermission {
             if (it.granted) {
-
                 Geofencer(requireContext())
                     .addGeofence(geofence, AppGeofenceService::class.java) {
                         container.visibility = View.GONE
