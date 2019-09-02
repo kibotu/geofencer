@@ -3,7 +3,6 @@ package com.sprotte.geofencer.demo.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.fragment.NavHostFragment
-import com.google.android.gms.common.GoogleApiAvailability
 import com.sprotte.geofencer.demo.R
 import net.kibotu.logger.LogcatLogger
 import net.kibotu.logger.Logger

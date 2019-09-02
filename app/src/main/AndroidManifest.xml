@@ -33,9 +33,8 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".ui.GeoFenceIntentService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:name=".ui.AppGeofenceService"
+            android:exported="false" />
 
     </application>
 

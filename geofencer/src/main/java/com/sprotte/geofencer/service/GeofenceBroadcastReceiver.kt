@@ -1,4 +1,4 @@
-package com.sprotte.geofencer
+package com.sprotte.geofencer.service
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -6,6 +6,8 @@ import android.content.Intent
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import androidx.core.app.JobIntentService
+import com.sprotte.geofencer.GeofenceRepository
+import com.sprotte.geofencer.Geofencer
 import com.sprotte.geofencer.utils.log
 
 
