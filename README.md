@@ -16,7 +16,7 @@ Add it in your root build.gradle at the end of repositories:
 ##### Step 2. Add the dependency
 
 	dependencies {
-		implementation 'com.sprotte:geofencer:1.0.2'
+		implementation 'com.sprotte:geofencer:1.0.3'
 	}
 	
 # Set up for geofence monitoring
