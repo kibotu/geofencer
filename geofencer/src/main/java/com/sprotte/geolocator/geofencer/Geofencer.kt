@@ -1,11 +1,11 @@
-package com.sprotte.geofencer
+package com.sprotte.geolocator.geofencer
 
 import android.Manifest
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
 import androidx.core.app.JobIntentService
-import com.sprotte.geofencer.models.Geofence
+import com.sprotte.geolocator.geofencer.models.Geofence
 
 class Geofencer(context: Context) {
 

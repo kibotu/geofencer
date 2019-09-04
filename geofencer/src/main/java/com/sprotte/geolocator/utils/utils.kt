@@ -3,15 +3,17 @@
  */
 @file:JvmName("DebugExtensions")
 
-package com.sprotte.geofencer.utils
+package com.sprotte.geolocator.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.sprotte.geofencer.BuildConfig
+import com.sprotte.geolocator.geofencer.BuildConfig
 
 internal val debug = BuildConfig.DEBUG
 
@@ -60,3 +62,17 @@ internal fun Context.safeContext(): Context =
             ContextCompat.createDeviceProtectedStorageContext(it) ?: it
         }
     } ?: this
+
+internal fun Context.getSharedPrefs(): SharedPreferences{
+    val safeContext: Context by lazyFast { this.safeContext() }
+
+    val sharedPreferences: SharedPreferences by lazyFast {
+        PreferenceManager.getDefaultSharedPreferences(safeContext)
+    }
+    return sharedPreferences
+}
+
+
+internal fun Context.getRes(resInt: Int): Long{
+    return applicationContext.resources.getInteger(resInt).toLong()
+}

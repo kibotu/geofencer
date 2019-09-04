@@ -1,17 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sprotte.geofencer">
+    package="com.sprotte.geolocator.geofencer">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application>
 
         <receiver
-            android:name="com.sprotte.geofencer.service.GeofenceBroadcastReceiver"
+            android:name="com.sprotte.geolocator.geofencer.service.GeofenceBroadcastReceiver"
             android:enabled="true"
             android:exported="false" />
 
         <receiver
-            android:name="com.sprotte.geofencer.service.GeofenceBootReceiver"
+            android:name="com.sprotte.geolocator.geofencer.service.GeofenceBootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -23,11 +23,20 @@
             </intent-filter>
         </receiver>
 
-
-
-        <service android:name="com.sprotte.geofencer.service.GeofenceBootService"
+        <service android:name="com.sprotte.geolocator.geofencer.service.GeofenceBootService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
 
+
+        <service
+            android:name="com.sprotte.geolocator.tracking.service.LocationTrackerUpdateIntentService"
+            android:exported="false" />
+
+        <receiver android:name="com.sprotte.geolocator.tracking.service.LocationTrackerUpdateBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.sprotte.geolocator.tracking.service.ACTION_PROCESS_UPDATES" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

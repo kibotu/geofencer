@@ -1,11 +1,11 @@
-package com.sprotte.geofencer.service
+package com.sprotte.geolocator.geofencer.service
 
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.NonNull
 import androidx.core.app.JobIntentService
-import com.sprotte.geofencer.Geofencer
-import com.sprotte.geofencer.utils.log
+import com.sprotte.geolocator.geofencer.Geofencer
+import com.sprotte.geolocator.utils.log
 
 class GeofenceBootService : JobIntentService() {
 

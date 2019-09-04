@@ -1,4 +1,4 @@
-package com.sprotte.geofencer.utils
+package com.sprotte.geolocator.utils
 
 import android.content.Context
 import android.content.SharedPreferences

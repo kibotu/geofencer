@@ -1,5 +1,5 @@
 
-package com.sprotte.geofencer.models
+package com.sprotte.geolocator.geofencer.models
 
 import java.util.*
 

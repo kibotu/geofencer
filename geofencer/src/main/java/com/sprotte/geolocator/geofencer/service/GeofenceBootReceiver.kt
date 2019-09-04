@@ -1,9 +1,9 @@
-package com.sprotte.geofencer.service
+package com.sprotte.geolocator.geofencer.service
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.sprotte.geofencer.utils.log
+import com.sprotte.geolocator.utils.log
 
 class GeofenceBootReceiver : BroadcastReceiver() {
 

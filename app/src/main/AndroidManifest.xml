@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.sprotte.geofencer.demo">
+    package="com.sprotte.geolocator.geofencer.demo">
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
 
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:launchMode="singleInstance"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -21,7 +23,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".ui.MainActivity">
+        <activity
+            android:name=".ui.MainActivity"
+            android:launchMode="singleInstance">
 
             <nav-graph android:value="@navigation/navigation_controller" />
 
@@ -32,10 +36,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".ui.AppGeofenceService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true" />
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <service
+            android:name=".ui.AppTrackerService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>
 

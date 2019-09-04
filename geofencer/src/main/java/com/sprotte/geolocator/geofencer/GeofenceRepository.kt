@@ -1,17 +1,18 @@
-package com.sprotte.geofencer
+package com.sprotte.geolocator.geofencer
 
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Geofence.*
+import com.google.android.gms.location.Geofence.Builder
+import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingRequest
-import com.sprotte.geofencer.models.Geofence
-import com.sprotte.geofencer.service.GeofenceBroadcastReceiver
-import com.sprotte.geofencer.utils.fromJson
-import com.sprotte.geofencer.utils.loge
-import com.sprotte.geofencer.utils.sharedPreference
-import com.sprotte.geofencer.utils.toJson
+import com.google.android.gms.location.LocationServices
+import com.sprotte.geolocator.geofencer.models.Geofence
+import com.sprotte.geolocator.geofencer.service.GeofenceBroadcastReceiver
+import com.sprotte.geolocator.utils.fromJson
+import com.sprotte.geolocator.utils.loge
+import com.sprotte.geolocator.utils.sharedPreference
+import com.sprotte.geolocator.utils.toJson
 
 class GeofenceRepository(private val context: Context) {
 

@@ -1,9 +1,10 @@
-package com.sprotte.geofencer.demo.ui
+package com.sprotte.geolocator.geofencer.demo.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.SharedPreferences
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
@@ -18,16 +19,15 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
-import com.sprotte.geofencer.Geofencer
-import com.sprotte.geofencer.demo.R
-import com.sprotte.geofencer.demo.hideKeyboard
-import com.sprotte.geofencer.demo.requestFocusWithKeyboard
-import com.sprotte.geofencer.demo.showGeofenceInMap
-import com.sprotte.geofencer.models.Geofence
+import com.sprotte.geolocator.geofencer.Geofencer
+import com.sprotte.geolocator.geofencer.demo.*
+import com.sprotte.geolocator.geofencer.models.Geofence
+import com.sprotte.geolocator.tracking.LocationTracker
 import com.tbruyelle.rxpermissions2.Permission
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_map.*
+import net.kibotu.logger.Logger
 import kotlin.math.roundToInt
 
 
@@ -41,8 +41,17 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
     private var geofence = Geofence()
 
+    private val preferenceChangedListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { preferences, key ->
+            val value = preferences.getString(key, "invalid")
+            Logger.v("OnSharedPreferenceChange $key $value")
+        }
+
+
     override fun subscribeUi() {
         super.subscribeUi()
+
+        this.context?.getSharedPrefs()?.registerOnSharedPreferenceChangeListener(preferenceChangedListener)
 
         newReminder.visibility = View.GONE
         currentLocation.visibility = View.GONE
@@ -68,6 +77,12 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         mapFragment.getMapAsync { map ->
             this.map = map
             requestLocationPermission {
+
+                LocationTracker()
+                    .removeLocationUpdates(requireContext())
+                LocationTracker()
+                    .requestLocationUpdates(requireContext(), AppTrackerService::class.java)
+
 
                 map.isMyLocationEnabled = it.granted
 
@@ -171,7 +186,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     }
 
     private fun removeGeofence(geofence: Geofence) {
-        Geofencer(requireContext()).removeGeofence(geofence.id){
+        Geofencer(requireContext()).removeGeofence(geofence.id) {
             showGeofences()
             Snackbar.make(main, R.string.reminder_removed_success, Snackbar.LENGTH_LONG)
                 .show()
@@ -243,7 +258,6 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             updateRadiusWithProgress(progress)
-
             showGeofenceUpdate()
         }
     }

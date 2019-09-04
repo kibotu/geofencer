@@ -1,9 +1,9 @@
-package com.sprotte.geofencer.demo.ui
+package com.sprotte.geolocator.geofencer.demo.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
-import com.sprotte.geofencer.demo.R
+import com.sprotte.geolocator.geofencer.demo.R
 import net.kibotu.logger.LogcatLogger
 import net.kibotu.logger.Logger
 
@@ -19,7 +19,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Logger.addLogger(LogcatLogger())
-     }
+
+
+
+    }
 
     override fun onSupportNavigateUp(): Boolean = navController.navigateUp() || super.onSupportNavigateUp()
 
