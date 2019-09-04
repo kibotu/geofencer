@@ -20,12 +20,10 @@ import com.sprotte.geolocator.utils.log
  * https://codelabs.developers.google.com/codelabs/background-location-updates-android-o/
  * https://github.com/googlesamples/android-play-location
  */
-class LocationTracker {
+object LocationTracker {
 
-    companion object {
-        const val REQUEST_CODE = 5998
-        val PREFS_NAME = LocationTrackerUpdateIntentService::class.java.canonicalName
-    }
+    private const val REQUEST_CODE = 5998
+    internal val PREFS_NAME = LocationTrackerUpdateIntentService::class.java.canonicalName
 
     private fun getTrackingPendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, LocationTrackerUpdateBroadcastReceiver::class.java)

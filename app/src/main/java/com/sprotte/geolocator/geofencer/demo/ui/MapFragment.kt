@@ -78,9 +78,9 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             this.map = map
             requestLocationPermission {
 
-                LocationTracker()
+                LocationTracker
                     .removeLocationUpdates(requireContext())
-                LocationTracker()
+                LocationTracker
                     .requestLocationUpdates(requireContext(), AppTrackerService::class.java)
 
 

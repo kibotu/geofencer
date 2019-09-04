@@ -30,7 +30,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
 
         val geofenceTransition = geofencingEvent.geofenceTransition
-        log("geofence was triggered: $geofenceTransition")
+        log("geo        fence was triggered: $geofenceTransition")
         if (geofenceTransition != Geofence.GEOFENCE_TRANSITION_ENTER && geofenceTransition != Geofence.GEOFENCE_TRANSITION_EXIT) {
             log("unknow geofencing error")
             return
