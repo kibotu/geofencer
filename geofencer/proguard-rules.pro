@@ -20,4 +20,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.sprotte.geolocator.geofencer.** { *; }
+-keep class com.sprotte.geolocator.** { *; }
