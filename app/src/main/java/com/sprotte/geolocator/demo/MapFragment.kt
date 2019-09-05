@@ -1,4 +1,4 @@
-package com.sprotte.geolocator.geofencer.demo.ui
+package com.sprotte.geolocator.demo
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -20,7 +20,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
 import com.sprotte.geolocator.geofencer.Geofencer
-import com.sprotte.geolocator.geofencer.demo.*
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
 import com.tbruyelle.rxpermissions2.Permission

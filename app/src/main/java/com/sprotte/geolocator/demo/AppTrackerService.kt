@@ -1,10 +1,10 @@
-package com.sprotte.geolocator.geofencer.demo.ui
+package com.sprotte.geolocator.demo
 
 import com.exozet.android.core.gson.toJson
 import com.exozet.android.core.storage.sharedPreference
 import com.google.android.gms.location.LocationResult
-import com.sprotte.geolocator.geofencer.demo.sendNotification
 import com.sprotte.geolocator.tracking.service.LocationTrackerUpdateIntentService
+import net.kibotu.logger.Logger
 
 class AppTrackerService : LocationTrackerUpdateIntentService() {
 

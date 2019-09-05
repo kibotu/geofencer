@@ -13,10 +13,6 @@ import com.sprotte.geolocator.utils.log
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
-
-
-
-
     override fun onReceive(context: Context?, intent: Intent?) {
 
         if (context == null) {

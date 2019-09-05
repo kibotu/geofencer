@@ -26,6 +26,7 @@ android {
         versionCode VERSION_CODE
         versionName VERSION_NAME
         vectorDrawables.useSupportLibrary = true
+        useLibrary 'org.apache.http.legacy'
     }
 
     signingConfigs {
@@ -55,15 +56,23 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            pseudoLocalesEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            applicationIdSuffix ""
+            pseudoLocalesEnabled true
+            debuggable true
             minifyEnabled false
-            shrinkResources = false
+            crunchPngs false
+            shrinkResources false
+            zipAlignEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             signingConfig signingConfigs.release
+            pseudoLocalesEnabled false
+            debuggable true
             minifyEnabled true
-            shrinkResources = true
+            crunchPngs true
+            shrinkResources true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

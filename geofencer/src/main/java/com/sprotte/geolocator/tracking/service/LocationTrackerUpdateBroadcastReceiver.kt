@@ -36,9 +36,15 @@ class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
 
         if (ACTION_PROCESS_UPDATES != action) return
 
-        val result = LocationResult.extractResult(intent) ?: return
-        log("$result")
+        val result = try {
+            LocationResult.extractResult(intent) ?: return
 
+        } catch (e: Exception) {
+            log(e.message)
+            return
+        }
+
+        log("result = $result")
 
         val intentClassName = context.getSharedPrefs().getString(LocationTracker.PREFS_NAME, "")
         log("$intentClassName")
@@ -54,6 +60,7 @@ class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
 
     companion object {
 
-        internal val ACTION_PROCESS_UPDATES = "com.sprotte.geolocator.tracking.service" + ".PROCESS_UPDATES"
+        internal val ACTION_PROCESS_UPDATES =
+            "com.sprotte.geolocator.tracking.service" + ".PROCESS_UPDATES"
     }
 }

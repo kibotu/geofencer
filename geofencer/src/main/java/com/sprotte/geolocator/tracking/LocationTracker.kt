@@ -1,11 +1,11 @@
-package com.sprotte.geolocator.tracking;
+package com.sprotte.geolocator.tracking
 
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.sprotte.geolocator.geofencer.R
+import com.sprotte.geolocator.R
 import com.sprotte.geolocator.tracking.service.LocationTrackerUpdateBroadcastReceiver
 import com.sprotte.geolocator.tracking.service.LocationTrackerUpdateIntentService
 import com.sprotte.geolocator.utils.getRes

@@ -1,9 +1,8 @@
-package com.sprotte.geolocator.geofencer.demo.ui
+package com.sprotte.geolocator.demo
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
-import com.sprotte.geolocator.geofencer.demo.R
 import net.kibotu.logger.LogcatLogger
 import net.kibotu.logger.Logger
 

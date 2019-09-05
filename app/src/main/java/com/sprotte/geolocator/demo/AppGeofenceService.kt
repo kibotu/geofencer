@@ -1,6 +1,5 @@
-package com.sprotte.geolocator.geofencer.demo.ui
+package com.sprotte.geolocator.demo
 
-import com.sprotte.geolocator.geofencer.demo.sendNotification
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.geofencer.service.GeofenceIntentService
 
@@ -8,6 +7,10 @@ import com.sprotte.geolocator.geofencer.service.GeofenceIntentService
 class AppGeofenceService : GeofenceIntentService() {
 
     override fun onGeofence(geofence: Geofence) {
-        sendNotification(applicationContext, geofence.title, geofence.message)
+        sendNotification(
+            applicationContext,
+            geofence.title,
+            geofence.message
+        )
     }
 }

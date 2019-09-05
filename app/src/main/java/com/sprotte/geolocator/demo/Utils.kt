@@ -28,7 +28,7 @@
  * THE SOFTWARE.
  */
 
-package com.sprotte.geolocator.geofencer.demo
+package com.sprotte.geolocator.demo
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -51,7 +51,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import com.sprotte.geolocator.geofencer.demo.ui.MainActivity
 import com.sprotte.geolocator.geofencer.models.Geofence
 
 fun EditText.requestFocusWithKeyboard() {
@@ -88,7 +87,10 @@ fun showGeofenceInMap(
 ) {
 
     val latLng = LatLng(geofence.latitude, geofence.longitude)
-    val vectorToBitmap = vectorToBitmap(context.resources, R.drawable.ic_twotone_location_on_48px)
+    val vectorToBitmap = vectorToBitmap(
+        context.resources,
+        R.drawable.ic_twotone_location_on_48px
+    )
     val marker = map.addMarker(MarkerOptions().position(latLng).icon(vectorToBitmap))
     marker.tag = geofence.id
     if (geofence.radius != null) {
@@ -131,7 +133,9 @@ fun sendNotification(context: Context, title: String, message: String) {
     val notificationPendingIntent = stackBuilder
         .getPendingIntent(getUniqueId(), PendingIntent.FLAG_UPDATE_CURRENT)
 
-    val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+    val notification = NotificationCompat.Builder(context,
+        NOTIFICATION_CHANNEL_ID
+    )
         .setSmallIcon(R.mipmap.ic_launcher)
         .setContentTitle(title)
         .setContentText(message)

@@ -8,6 +8,6 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.sprotte.geolocator.geofencer.demo.ui.MapFragment"
+        android:name="com.sprotte.geolocator.demo.MapFragment"
         android:label="MapFragment" />
 </navigation>

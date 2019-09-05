@@ -13,7 +13,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.sprotte.geolocator.geofencer.BuildConfig
+import com.sprotte.geolocator.BuildConfig
 
 internal val debug = BuildConfig.DEBUG
 
