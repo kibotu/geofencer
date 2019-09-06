@@ -142,7 +142,7 @@ dependencies {
     implementation libs.androidKtxNavigationUi
     implementation libs.androidKtxNavigationRuntime
 
-    implementation project(':geolocator')
+    implementation project(':Geolocator')
 
     implementation libs.exozetCore
 
