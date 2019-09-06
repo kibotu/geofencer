@@ -142,7 +142,7 @@ dependencies {
     implementation libs.androidKtxNavigationUi
     implementation libs.androidKtxNavigationRuntime
 
-    implementation project(':geofencer')
+    implementation project(':geolocator')
 
     implementation libs.exozetCore
 
@@ -164,7 +164,4 @@ configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
 
     resolutionStrategy.force libs.kotlinJdk8
-}
-repositories {
-    mavenCentral()
 }

@@ -1,6 +1,4 @@
 buildscript { 
-    ext.kotlin_version = '1.3.41'
-
 
     apply from: "${project.rootDir}/Android-Dependencies/dependencies.gradle"
 
@@ -25,8 +23,7 @@ buildscript {
 
         classpath plugin.realm
         classpath pluginLibrary.gradleBintrayPlugin
-
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" }
+    }
 }
 
 allprojects {
