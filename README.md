@@ -13,7 +13,7 @@ Features:
 - location updates
 - configurable update intervals
 
-[![sample.gif](sample.gif)]
+![sample.gif](sample.gif)
      
 ### Requirmenets
 
