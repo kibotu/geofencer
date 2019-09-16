@@ -16,11 +16,11 @@ class LocationTrackerService : LocationTrackerUpdateIntentService() {
 
         Log.v(GeofenceIntentService::class.java.simpleName, "onLocationResult $location")
         location = locationResult.toJson()
-        sendNotification(
-            applicationContext,
-            "LOCATION",
-            location
-        )
+//        sendNotification(
+//            applicationContext,
+//            "LOCATION",
+//            location
+//        )
     }
 
     companion object {

@@ -4,12 +4,16 @@
 
 Convience library to receive user location updates and geofence events with minimal effort. 
 
+Features:
+
 - supports Android-Q
 - receive updates on background
 - receive updates if app got killed
 - geofence updates (dwell, enter, exit)
 - location updates
 - configurable update intervals
+
+[![sample.gif](sample.gif)]
      
 ### Requirmenets
 
