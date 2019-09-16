@@ -138,7 +138,7 @@ Convience library to receive user location updates and geofence events with mini
 
 #### jCenter / mavenCentral
 
-	implementation 'com.sprotte: Geolocator:latest'
+	implementation 'com.sprotte:Geolocator:latest'
 
 #### or Jiptack
 
