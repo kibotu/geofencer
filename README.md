@@ -1,8 +1,144 @@
-# Geolocator [![API](https://img.shields.io/badge/API-15%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15) [![Gradle Version](https://img.shields.io/badge/gradle-5.6.1-green.svg)](https://docs.gradle.org/current/release-notes)  [![Kotlin](https://img.shields.io/badge/kotlin-1.3.50-green.svg)](https://kotlinlang.org/)[ ![Download](https://api.bintray.com/packages/exozetag/maven/Geolocator/images/download.svg) ](https://bintray.com/exozetag/maven/Geolocator/_latestVersion) [![Build Status](https://app.bitrise.io/app/62c5e7d6d14d57dd/status.svg?token=i0sTxq2L3WeD26_b77uA5A)](https://app.bitrise.io/app/62c5e7d6d14d57dd) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Geolocator-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/7860)
+# Geofencer 
+[![Build Status](https://app.bitrise.io/app/62c5e7d6d14d57dd/status.svg?token=i0sTxq2L3WeD26_b77uA5A)](https://app.bitrise.io/app/62c5e7d6d14d57dd) [ ![Download](https://api.bintray.com/packages/exozetag/maven/Geolocator/images/download.svg?version=1.1.1) ](https://bintray.com/exozetag/maven/Geolocator/1.1.1/link) [![](https://jitpack.io/v/exozet/Geolocator.svg)](https://jitpack.io/#exozet/Geolocator)
+[![API](https://img.shields.io/badge/API-15%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15) [![Gradle Version](https://img.shields.io/badge/gradle-5.6.1-green.svg)](https://docs.gradle.org/current/release-notes) [![Kotlin](https://img.shields.io/badge/kotlin-1.3.50-green.svg)](https://kotlinlang.org/) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Geolocator-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/7860)
 
+Convience library to receive user location updates and geofence events with minimal effort. 
+
+- supports Android-Q
+- receive updates on background
+- receive updates if app got killed
+- geofence updates (dwell, enter, exit)
+- location updates
+- configurable update intervals
+     
+### Requirmenets
+
+1. Location permissions in *AndroidManifest.xml*
+
+	    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+   	 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+   	 	
+2. Google maps api key
+
+		<string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">YOUR_KEY</string>
+	
+### How to use
+
+### Geofence
+
+1. Create Receiver
  
+		class GeofenceIntentService : GeofenceIntentService() {
+		
+		    override fun onGeofence(geofence: Geofence) {
+		    	Log.v(GeoFenceIntentService::class.java.simpleName, "onGeofence $geofence")	    
+		    }
+		}
+		
+2. Add receiver to your manifest
+
+	 	<service
+            android:name=".kotlin.GeoFenceIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />		
+3. Start geofence tracking
+
+   		val geofence = Geofence(
+            id = UUID.randomUUID().toString(),
+            latitude = 51.0899232,
+            longitude = 5.968358,
+            radius = 30.0,
+            title = "Germany",
+            message = "Entered Germany",
+            transitionType = GEOFENCE_TRANSITION_ENTER
+        )
         
-# How to install (tbd)
+        Geofencer(this).addGeofence(geofence, GeoFenceIntentService::class.java) { /* successfully added geofence */ }
+
+### Location Tracker
+
+1. Create Receiver
+
+		class LocationTrackerService : LocationTrackerUpdateIntentService() {
+
+	    	override fun onLocationResult(locationResult: LocationResult) {  
+	    		Log.v(GeoFenceIntentService::class.java.simpleName, "onLocationResult $location")
+	      }
+      	}
+
+2. Add receiver to manifest
+
+		<service
+            android:name=".kotlin.LocationTrackerService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+3. Start tracking
+
+		 LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
+
+### How to use in Java
+
+### Geofence
+
+1. Create Receiver
+
+		public class GeoFenceIntentService extends GeofenceIntentService {
+	
+	    	@Override
+	    	public void onGeofence(@NotNull Geofence geofence) {
+	
+	        	Log.v(GeoFenceIntentService.class.getSimpleName(), "onGeofence " + geofence);	    	
+	       	}
+		}
+		
+2. Add receiver to your manifest
+
+	 	<service
+            android:name=".java.GeoFenceIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />		
+3. Start geofence tracking
+
+ 		Geofence geofence = new Geofence(
+                UUID.randomUUID().toString(),
+                51.0899232,
+                5.968358,
+                30.0,
+                "Germany",
+                "Entered Germany",
+                GEOFENCE_TRANSITION_ENTER);
+    	Geofencer geofencer = new Geofencer(this);
+    	geofencer.addGeofence(geofence, GeoFenceIntentService.class,
+           	 () -> /* successfully added geofence */ Unit.INSTANCE);
+
+### Location Tracker
+
+1. Create Receiver
+
+		public class LocationTrackerService extends LocationTrackerUpdateIntentService {
+
+		    @Override
+		    public void onLocationResult(@NotNull LocationResult location) {
+		
+		        Log.v(GeoFenceIntentService.class.getSimpleName(), "onLocationResult " + location);		        );
+		    }
+		}
+
+2. Add receiver to manifest
+
+		<service
+            android:name=".java.LocationTrackerService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+3. Start tracking
+
+		LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
+
+### How to install
+
+#### jCenter / mavenCentral
+
+	implementation 'com.sprotte: Geolocator:latest'
+
+#### or Jiptack
 
 ##### Step 1. Add the JitPack repository to your build file
 
@@ -10,53 +146,26 @@ Add it in your root build.gradle at the end of repositories:
 
 	allprojects {
 		repositories {
-			...
-			maven { url 'https://dl.bintray.com/exozetag/maven' }
+			maven { url 'https://jitpack.io' }
 		}
 	}
 ##### Step 2. Add the dependency
 
 	dependencies {
-		implementation 'com.sprotte:Geolocator:latest'
+		implementation 'com.github.exozet:Geolocator:latest'
 	}
 	
-# Set up for geofence monitoring
+### Configuration
 
-The first step in requesting geofence monitoring is to request the necessary permission. To use geofencing, your app must request `ACCESS_FINE_LOCATION`. To request this permission, add the following element as a child element of the `<manifest>` element in your app manifest:
+Default Location tracking update intervals can be overriden, by adding following parameter into your _app/res/_ - folder, e.g. **app/res/values.xml**
 
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-	
-You have to inherit from [GeofenceIntentService](geofencer/service/GeofenceBroadcastReceiver.kt) 
-
-	class AppGeofenceService : GeofenceIntentService() {
-	
-	    override fun onGeofence(geofence: Geofence) {
-	    	 //do your stuff like sendNotification(applicationContext, geofence.title, geofence.message)
-	    }
-	}
-
-And register your service in the manifest
-
-    <service
-     android:name=".ui.AppGeofenceService"
-     android:permission="android.permission.BIND_JOB_SERVICE"
-     android:exported="true"/>
-     
-Add your google key in strings.xml like so
-
-	<string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">YOUR_KEY</string>
-
-     
-# How to use the library
-
-    val geofence = Geofence(id = "bla", latitude = 42.22, longitude = 57.234, radius = 10.0)
-	Geofencer(requireContext()).addGeofence(geofence, AppGeofenceService::class.java) {
-		//success
-	}
+    <integer name="location_update_interval_in_millis">0</integer>
+    <integer name="location_fastest_update_interval_in_millis">0</integer>
+    <integer name="location_max_wait_time_interval_in_millis">0</integer>
+    <integer name="location_min_distance_for_updates_in_meters">0</integer>
 
 
-
-## Contributors
+### Contributors
 
 [Jan Rabe](jan.rabe@exozet.com)
 

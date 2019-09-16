@@ -14,18 +14,22 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:launchMode="singleInstance"
+        android:networkSecurityConfig="@xml/network_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:networkSecurityConfig="@xml/network_config"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".kotlin.MainActivity"
             android:launchMode="singleInstance">
 
             <nav-graph android:value="@navigation/navigation_controller" />
@@ -39,16 +43,30 @@
         </activity>
 
         <service
-            android:name=".AppGeofenceService"
+            android:name=".kotlin.GeofenceIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
-            android:name=".AppTrackerService"
+            android:name=".kotlin.LocationTrackerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false"/>
+        <!-- java version -->
+
+        <activity
+            android:name=".java.AddGeoFenceActivity"
+            android:launchMode="singleInstance">
+
+            <nav-graph android:value="@navigation/navigation_controller" />
+
+        </activity>
+
+        <service
+            android:name=".java.GeofenceIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".java.LocationTrackerService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
     </application>
 
 </manifest>

@@ -28,14 +28,14 @@ class Geofencer(context: Context) {
     var repository = GeofenceRepository(context)
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    inline fun <reified T : JobIntentService> addGeofence(
+    fun <T : JobIntentService> addGeofence(
         geofence: Geofence,
         intent: Class<T>,
-        crossinline success: () -> Unit
+        success: (() -> Unit)? = null
     ) {
         geofence.intentClassName = intent.canonicalName!!
         repository.add(geofence) {
-            success()
+            success?.invoke()
         }
     }
 
@@ -60,5 +60,4 @@ class Geofencer(context: Context) {
     fun getAll(): List<Geofence> {
         return repository.getAll()
     }
-
 }

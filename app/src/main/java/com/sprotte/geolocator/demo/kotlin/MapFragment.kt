@@ -1,6 +1,5 @@
-package com.sprotte.geolocator.demo
+package com.sprotte.geolocator.demo.kotlin
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
@@ -8,7 +7,6 @@ import android.content.SharedPreferences
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
-import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import com.exozet.android.core.base.BaseFragment
@@ -19,12 +17,12 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
+import com.sprotte.geolocator.demo.R
+import com.sprotte.geolocator.demo.misc.*
+import com.sprotte.geolocator.demo.misc.getSharedPrefs
 import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
-import com.tbruyelle.rxpermissions2.Permission
-import com.tbruyelle.rxpermissions2.RxPermissions
-import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_map.*
 import net.kibotu.logger.Logger
 import kotlin.math.roundToInt
@@ -45,7 +43,6 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             val value = preferences.getString(key, "invalid")
             Logger.v("OnSharedPreferenceChange $key $value")
         }
-
 
     override fun subscribeUi() {
         super.subscribeUi()
@@ -75,12 +72,12 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
         mapFragment.getMapAsync { map ->
             this.map = map
-            requestLocationPermission {
+            requireActivity().requestLocationPermission {
 
                 LocationTracker
                     .removeLocationUpdates(requireContext())
                 LocationTracker
-                    .requestLocationUpdates(requireContext(), AppTrackerService::class.java)
+                    .requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
 
 
                 map.isMyLocationEnabled = it.granted
@@ -115,29 +112,16 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
-    fun requestLocationPermission(block: (permission: Permission) -> Unit) = RxPermissions(this)
-        .requestEachCombined(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-        .subscribe({
-            block(it)
-        }, {
-            Log.v("sasd", "location permission $it")
-        })
-        .addTo(subscription)
-
     @SuppressLint("MissingPermission")
     private fun addGeofence(geofence: Geofence) {
-        requestLocationPermission {
+        requireActivity().requestLocationPermission {
             if (it.granted) {
                 Geofencer(requireContext())
-                    .addGeofence(geofence, AppGeofenceService::class.java) {
+                    .addGeofence(geofence, GeofenceIntentService::class.java) {
                         container.visibility = View.GONE
                         showGeofences()
                     }
             }
-
         }
     }
 
@@ -187,7 +171,8 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     private fun removeGeofence(geofence: Geofence) {
         Geofencer(requireContext()).removeGeofence(geofence.id) {
             showGeofences()
-            Snackbar.make(main, R.string.reminder_removed_success, Snackbar.LENGTH_LONG)
+            Snackbar.make(main,
+                R.string.reminder_removed_success, Snackbar.LENGTH_LONG)
                 .show()
         }
     }

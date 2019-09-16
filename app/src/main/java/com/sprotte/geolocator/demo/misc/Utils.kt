@@ -1,35 +1,6 @@
-/*
- * Copyright (c) 2018 Razeware LLC
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
- * distribute, sublicense, create a derivative work, and/or sell copies of the
- * Software in any work that is designed, intended, or marketed for pedagogical or
- * instructional purposes related to programming, coding, application development,
- * or information technology.  Permission for such use, copying, modification,
- * merger, publication, distribution, sublicensing, creation of derivative works,
- * or sale is expressly withheld.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
+package com.sprotte.geolocator.demo.misc
 
-package com.sprotte.geolocator.demo
-
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -41,6 +12,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
 import android.preference.PreferenceManager
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -49,9 +21,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import com.sprotte.geolocator.demo.BuildConfig
+import com.sprotte.geolocator.demo.R
+import com.sprotte.geolocator.demo.kotlin.MainActivity
 import com.sprotte.geolocator.geofencer.models.Geofence
+import com.tbruyelle.rxpermissions2.Permission
+import com.tbruyelle.rxpermissions2.RxPermissions
 
 fun EditText.requestFocusWithKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -99,8 +77,12 @@ fun showGeofenceInMap(
             CircleOptions()
                 .center(latLng)
                 .radius(radius)
-                .strokeColor(ContextCompat.getColor(context, R.color.colorAccent))
-                .fillColor(ContextCompat.getColor(context, R.color.colorReminderFill))
+                .strokeColor(ContextCompat.getColor(context,
+                    R.color.colorAccent
+                ))
+                .fillColor(ContextCompat.getColor(context,
+                    R.color.colorReminderFill
+                ))
         )
     }
 
@@ -172,3 +154,14 @@ internal fun Context.getSharedPrefs(): SharedPreferences {
     }
     return sharedPreferences
 }
+
+fun FragmentActivity.requestLocationPermission(block: (permission: Permission) -> Unit) = RxPermissions(this)
+    .requestEachCombined(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+    .subscribe({
+        block(it)
+    }, {
+        Log.v("LocationPermission", "location permission $it")
+    })
