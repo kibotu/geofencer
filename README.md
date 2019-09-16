@@ -13,7 +13,7 @@ Convience library to receive user location updates and geofence events with mini
      
 ### Requirmenets
 
-1. Location permissions in *AndroidManifest.xml*
+1. Location permissions in [*AndroidManifest.xml*](app/src/main/AndroidManifest.xml#L8-L9)
 
 	    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    	 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -26,7 +26,7 @@ Convience library to receive user location updates and geofence events with mini
 
 ### Geofence
 
-1. Create Receiver
+1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/kotlin/GeofenceIntentService.kt)
  
 		class GeofenceIntentService : GeofenceIntentService() {
 		
@@ -35,12 +35,13 @@ Convience library to receive user location updates and geofence events with mini
 		    }
 		}
 		
-2. Add receiver to your manifest
+2. Add receiver to your [manifest](app/src/main/AndroidManifest.xml#L45-L47)
 
 	 	<service
             android:name=".kotlin.GeoFenceIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />		
-3. Start geofence tracking
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+3. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L33-L46)
 
    		val geofence = Geofence(
             id = UUID.randomUUID().toString(),
@@ -56,7 +57,7 @@ Convience library to receive user location updates and geofence events with mini
 
 ### Location Tracker
 
-1. Create Receiver
+1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/kotlin/LocationTrackerService.kt)
 
 		class LocationTrackerService : LocationTrackerUpdateIntentService() {
 
@@ -65,13 +66,13 @@ Convience library to receive user location updates and geofence events with mini
 	      }
       	}
 
-2. Add receiver to manifest
+2. Add receiver to [manifest](app/src/main/AndroidManifest.xml#L49-L51)
 
 		<service
             android:name=".kotlin.LocationTrackerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-3. Start tracking
+3. [Start tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L48-L51)
 
 		 LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
 
@@ -79,7 +80,7 @@ Convience library to receive user location updates and geofence events with mini
 
 ### Geofence
 
-1. Create Receiver
+1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/GeofenceIntentService.java)
 
 		public class GeoFenceIntentService extends GeofenceIntentService {
 	
@@ -90,12 +91,13 @@ Convience library to receive user location updates and geofence events with mini
 	       	}
 		}
 		
-2. Add receiver to your manifest
+2. Add receiver to your [manifest](app/src/main/AndroidManifest.xml#L63-L65)
 
 	 	<service
             android:name=".java.GeoFenceIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />		
-3. Start geofence tracking
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+3. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L48-L63)
 
  		Geofence geofence = new Geofence(
                 UUID.randomUUID().toString(),
@@ -111,7 +113,7 @@ Convience library to receive user location updates and geofence events with mini
 
 ### Location Tracker
 
-1. Create Receiver
+1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/LocationTrackerService.java)
 
 		public class LocationTrackerService extends LocationTrackerUpdateIntentService {
 
@@ -122,13 +124,13 @@ Convience library to receive user location updates and geofence events with mini
 		    }
 		}
 
-2. Add receiver to manifest
+2. Add receiver to [manifest](app/src/main/AndroidManifest.xml#L66-L68)
 
 		<service
             android:name=".java.LocationTrackerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-3. Start tracking
+3. [Start tracking](https://github.com/exozet/Geolocator/blob/master/app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L65-L68)
 
 		LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
 
@@ -157,7 +159,7 @@ Add it in your root build.gradle at the end of repositories:
 	
 ### Configuration
 
-Default Location tracking update intervals can be overriden, by adding following parameter into your _app/res/_ - folder, e.g. **app/res/values.xml**
+Default Location tracking update intervals can be overriden, by adding following parameter into your _app/res/_ - folder, e.g. [**app/res/config.xml**](app/src/main/res/values/config.xml#L4-L7)
 
     <integer name="location_update_interval_in_millis">0</integer>
     <integer name="location_fastest_update_interval_in_millis">0</integer>
