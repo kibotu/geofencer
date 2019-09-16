@@ -31,14 +31,15 @@ Features:
 ### Geofence
 
 1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/kotlin/GeofenceIntentService.kt)
- 
-		class GeofenceIntentService : GeofenceIntentService() {
-		
-		    override fun onGeofence(geofence: Geofence) {
-		    	Log.v(GeoFenceIntentService::class.java.simpleName, "onGeofence $geofence")	    
-		    }
-		}
-		
+
+```kotlin
+class GeofenceIntentService : GeofenceIntentService() {
+	
+    override fun onGeofence(geofence: Geofence) {
+    	Log.v(GeoFenceIntentService::class.java.simpleName, "onGeofence $geofence")	    
+    }
+}
+```		
 2. Add receiver to your [manifest](app/src/main/AndroidManifest.xml#L45-L47)
 
 	 	<service
@@ -47,29 +48,31 @@ Features:
 
 3. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L33-L46)
 
-   		val geofence = Geofence(
-            id = UUID.randomUUID().toString(),
-            latitude = 51.0899232,
-            longitude = 5.968358,
-            radius = 30.0,
-            title = "Germany",
-            message = "Entered Germany",
-            transitionType = GEOFENCE_TRANSITION_ENTER
-        )
-        
-        Geofencer(this).addGeofence(geofence, GeoFenceIntentService::class.java) { /* successfully added geofence */ }
-
+```kotlin
+val geofence = Geofence(
+    id = UUID.randomUUID().toString(),
+    latitude = 51.0899232,
+    longitude = 5.968358,
+    radius = 30.0,
+    title = "Germany",
+    message = "Entered Germany",
+    transitionType = GEOFENCE_TRANSITION_ENTER
+)
+    
+Geofencer(this).addGeofence(geofence, GeoFenceIntentService::class.java) { /* successfully added geofence */ }
+```
 ### Location Tracker
 
 1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/kotlin/LocationTrackerService.kt)
 
-		class LocationTrackerService : LocationTrackerUpdateIntentService() {
+```kotlin
+class LocationTrackerService : LocationTrackerUpdateIntentService() {
 
-	    	override fun onLocationResult(locationResult: LocationResult) {  
-	    		Log.v(GeoFenceIntentService::class.java.simpleName, "onLocationResult $location")
-	      }
-      	}
-
+	override fun onLocationResult(locationResult: LocationResult) {  
+		Log.v(GeoFenceIntentService::class.java.simpleName, "onLocationResult $location")
+  }
+}
+```
 2. Add receiver to [manifest](app/src/main/AndroidManifest.xml#L49-L51)
 
 		<service
@@ -78,23 +81,25 @@ Features:
 
 3. [Start tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L48-L51)
 
-		 LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
-
+```kotlin
+LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
+```
 ### How to use in Java
 
 ### Geofence
 
 1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/GeofenceIntentService.java)
 
-		public class GeoFenceIntentService extends GeofenceIntentService {
+```java
+public class GeoFenceIntentService extends GeofenceIntentService {
 	
-	    	@Override
-	    	public void onGeofence(@NotNull Geofence geofence) {
+	@Override
+	public void onGeofence(@NotNull Geofence geofence) {
 	
-	        	Log.v(GeoFenceIntentService.class.getSimpleName(), "onGeofence " + geofence);	    	
-	       	}
-		}
-		
+    	Log.v(GeoFenceIntentService.class.getSimpleName(), "onGeofence " + geofence);	    	
+   	}
+}
+```		
 2. Add receiver to your [manifest](app/src/main/AndroidManifest.xml#L63-L65)
 
 	 	<service
@@ -103,30 +108,33 @@ Features:
 
 3. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L48-L63)
 
- 		Geofence geofence = new Geofence(
-                UUID.randomUUID().toString(),
-                51.0899232,
-                5.968358,
-                30.0,
-                "Germany",
-                "Entered Germany",
-                GEOFENCE_TRANSITION_ENTER);
-    	Geofencer geofencer = new Geofencer(this);
-    	geofencer.addGeofence(geofence, GeoFenceIntentService.class,
-           	 () -> /* successfully added geofence */ Unit.INSTANCE);
-
+```java
+Geofence geofence = new Geofence(
+        UUID.randomUUID().toString(),
+        51.0899232,
+        5.968358,
+        30.0,
+        "Germany",
+        "Entered Germany",
+        GEOFENCE_TRANSITION_ENTER);
+Geofencer geofencer = new Geofencer(this);
+geofencer.addGeofence(geofence, GeoFenceIntentService.class,
+   	 () -> /* successfully added geofence */ Unit.INSTANCE);        	 
+```
 ### Location Tracker
 
 1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/LocationTrackerService.java)
 
-		public class LocationTrackerService extends LocationTrackerUpdateIntentService {
+```java
+public class LocationTrackerService extends LocationTrackerUpdateIntentService {
 
-		    @Override
-		    public void onLocationResult(@NotNull LocationResult location) {
-		
-		        Log.v(GeoFenceIntentService.class.getSimpleName(), "onLocationResult " + location);		        );
-		    }
-		}
+    @Override
+    public void onLocationResult(@NotNull LocationResult location) {
+	
+        Log.v(GeoFenceIntentService.class.getSimpleName(), "onLocationResult " + location);		        );
+    }
+}
+```	
 
 2. Add receiver to [manifest](app/src/main/AndroidManifest.xml#L66-L68)
 
@@ -136,8 +144,9 @@ Features:
 
 3. [Start tracking](https://github.com/exozet/Geolocator/blob/master/app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L65-L68)
 
-		LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
-
+```java
+LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
+```
 ### How to install
 
 #### jCenter / mavenCentral
