@@ -179,6 +179,10 @@ Default Location tracking update intervals can be overriden, by adding following
     <integer name="location_max_wait_time_interval_in_millis">0</integer>
     <integer name="location_min_distance_for_updates_in_meters">0</integer>
 
+### Known Issues
+
+- does not work when in doze mode #2
+
 
 ### Contributors
 
