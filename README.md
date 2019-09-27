@@ -181,7 +181,7 @@ Default Location tracking update intervals can be overriden, by adding following
 
 ### Known Issues
 
-- does not work when in doze mode [#2](issues/2)
+- does not work when in doze mode [#2](https://github.com/exozet/Geolocator/issues/2)
 
 
 ### Contributors
