@@ -25,7 +25,6 @@ import com.sprotte.geolocator.utils.log
  */
 class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
 
-
     override fun onReceive(context: Context, intent: Intent?) {
 
         log("onReceive $intent")

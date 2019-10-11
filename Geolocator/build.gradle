@@ -8,6 +8,11 @@ apply plugin: 'com.github.dcendents.android-maven'
 
 android {
 
+    // @Parcelize
+    androidExtensions {
+        experimental = true
+    }
+
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
 
@@ -35,6 +40,14 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // endregion
+
+    // region compile options
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
     }
 
     // endregion

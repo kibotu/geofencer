@@ -7,9 +7,12 @@ import android.content.SharedPreferences
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
-import android.view.View
 import android.widget.SeekBar
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.exozet.android.core.base.BaseFragment
+import com.exozet.android.core.gson.fromJson
+import com.exozet.android.core.gson.toJson
 import com.exozet.android.core.storage.sharedPreference
 import com.github.florent37.application.provider.application
 import com.google.android.gms.location.LocationResult
@@ -39,18 +42,33 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
     private var geofence = Geofence()
 
-    private var location by sharedPreference(LocationTrackerService.PREFERENCE_LOCATION, LocationResult.create(listOf()))
-
     private val preferenceChangedListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
 
             // key has been updated
             if (key == LocationTrackerService.PREFERENCE_LOCATION) {
 
                 // retrieve location from preferences
-                val locationResult = location
+                val locationResult = sharedPreferences.getString(key, null)
 
-                Logger.v("OnSharedPreferenceChange ${locationResult.lastLocation}")
+                // retrieve location data:
+                // val lastLocation = locationResult.lastLocation
+                // val locations = locationResult.locations
+                // locations.forEach {
+                //     it.latitude
+                //     it.longitude
+                //     it.altitude
+                //     it.speed
+                //     it.bearing
+                // }
+
+                // lastLocation.latitude
+                // lastLocation.longitude
+                // lastLocation.altitude
+                // lastLocation.speed
+                // lastLocation.bearing
+
+                Logger.v("OnSharedPreferenceChange 1 $locationResult")
             }
         }
 
@@ -59,8 +77,8 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
         this.context?.getSharedPrefs()?.registerOnSharedPreferenceChangeListener(preferenceChangedListener)
 
-        newReminder.visibility = View.GONE
-        currentLocation.visibility = View.GONE
+        newReminder.isGone = true
+        currentLocation.isGone = true
 
         locationManager = application?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -84,17 +102,15 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             this.map = map
             requireActivity().requestLocationPermission {
 
-                LocationTracker
-                    .removeLocationUpdates(requireContext())
-                LocationTracker
-                    .requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+                LocationTracker.removeLocationUpdates(requireContext())
+                LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
 
 
                 map.isMyLocationEnabled = it.granted
 
                 if (it.granted) {
-                    newReminder.visibility = View.VISIBLE
-                    currentLocation.visibility = View.VISIBLE
+                    newReminder.isVisible = true
+                    currentLocation.isVisible = true
                     @SuppressLint("MissingPermission")
                     val location = getLastKnownLocation()
                     if (location != null) {
@@ -128,7 +144,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             if (it.granted) {
                 Geofencer(requireContext())
                     .addGeofence(geofence, GeofenceIntentService::class.java) {
-                        container.visibility = View.GONE
+                        container.isGone = true
                         showGeofences()
                     }
             }
@@ -184,19 +200,18 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             Snackbar.make(
                 main,
                 R.string.reminder_removed_success, Snackbar.LENGTH_LONG
-            )
-                .show()
+            ).show()
         }
     }
 
     private fun showConfigureLocationStep() {
-        container.visibility = View.VISIBLE
-        marker.visibility = View.VISIBLE
-        instructionTitle.visibility = View.VISIBLE
-        instructionSubtitle.visibility = View.VISIBLE
-        radiusBar.visibility = View.GONE
-        radiusDescription.visibility = View.GONE
-        message.visibility = View.GONE
+        container.isVisible = true
+        marker.isVisible = true
+        instructionTitle.isVisible = true
+        instructionSubtitle.isVisible = true
+        radiusBar.isGone = true
+        radiusDescription.isGone = true
+        message.isGone = true
         instructionTitle.text = getString(R.string.instruction_where_description)
         next.setOnClickListener {
             geofence.latitude = map?.cameraPosition?.target?.latitude ?: 0.0
@@ -207,12 +222,12 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     }
 
     private fun showConfigureRadiusStep() {
-        marker.visibility = View.GONE
-        instructionTitle.visibility = View.VISIBLE
-        instructionSubtitle.visibility = View.GONE
-        radiusBar.visibility = View.VISIBLE
-        radiusDescription.visibility = View.VISIBLE
-        message.visibility = View.GONE
+        marker.isGone = true
+        instructionTitle.isVisible = true
+        instructionSubtitle.isGone = true
+        radiusBar.isVisible = true
+        radiusDescription.isVisible = true
+        message.isGone = true
         instructionTitle.text = getString(R.string.instruction_radius_description)
         next.setOnClickListener {
             showConfigureMessageStep()
@@ -224,12 +239,12 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     }
 
     private fun showConfigureMessageStep() {
-        marker.visibility = View.GONE
-        instructionTitle.visibility = View.VISIBLE
-        instructionSubtitle.visibility = View.GONE
-        radiusBar.visibility = View.GONE
-        radiusDescription.visibility = View.GONE
-        message.visibility = View.VISIBLE
+        marker.isGone = true
+        instructionTitle.isVisible = true
+        instructionSubtitle.isGone = true
+        radiusBar.isGone = true
+        radiusDescription.isGone = true
+        message.isVisible = true
         instructionTitle.text = getString(R.string.instruction_message_description)
         next.setOnClickListener {
             hideKeyboard(context!!, message)

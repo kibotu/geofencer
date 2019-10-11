@@ -11,14 +11,13 @@ import org.jetbrains.annotations.NotNull;
 public class LocationTrackerService extends LocationTrackerUpdateIntentService {
 
     @Override
-    public void onLocationResult(@NotNull LocationResult location) {
-
-        Log.v(GeofenceIntentService.class.getSimpleName(), "onLocationResult " + location);
+    public void onLocationResult(@NotNull LocationResult locationResult) {
+        Log.v(GeofenceIntentService.class.getSimpleName(), "onLocationResult " + locationResult);
 
         UtilsKt.sendNotification(
                 getApplicationContext(),
                 "Location Update",
-                location.toString()
+                locationResult.toString()
         );
     }
 }

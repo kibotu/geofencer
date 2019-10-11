@@ -1,7 +1,6 @@
 package com.sprotte.geolocator.demo.kotlin
 
 import android.Manifest.permission
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +15,6 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

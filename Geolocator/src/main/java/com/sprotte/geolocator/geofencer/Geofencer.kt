@@ -28,21 +28,14 @@ class Geofencer(context: Context) {
     var repository = GeofenceRepository(context)
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    fun <T : JobIntentService> addGeofence(
-        geofence: Geofence,
-        intent: Class<T>,
-        success: (() -> Unit)? = null
-    ) {
+    fun <T : JobIntentService> addGeofence(geofence: Geofence, intent: Class<T>, success: (() -> Unit)? = null) {
         geofence.intentClassName = intent.canonicalName!!
         repository.add(geofence) {
             success?.invoke()
         }
     }
 
-    fun removeGeofence(
-        id: String,
-        success: () -> Unit
-    ) {
+    fun removeGeofence(id: String, success: () -> Unit) {
         val geofence = repository.get(id) ?: return
         repository.remove(geofence, success)
     }
