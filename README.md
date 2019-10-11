@@ -84,6 +84,13 @@ class LocationTrackerService : LocationTrackerUpdateIntentService() {
 ```kotlin
 LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
 ```
+
+4. Stop tracking
+
+```kotlin
+LocationTracker.removeLocationUpdates(requireContext())
+```
+
 ### How to use in Java
 
 ### Geofence
@@ -147,6 +154,13 @@ public class LocationTrackerService extends LocationTrackerUpdateIntentService {
 ```java
 LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
 ```
+
+4. Stop tracking
+
+```java
+LocationTracker.INSTANCE.removeLocationUpdates(this);
+```
+
 ### How to install
 
 #### jCenter / mavenCentral
