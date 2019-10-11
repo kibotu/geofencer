@@ -10,7 +10,9 @@ import android.location.LocationManager
 import android.view.View
 import android.widget.SeekBar
 import com.exozet.android.core.base.BaseFragment
+import com.exozet.android.core.storage.sharedPreference
 import com.github.florent37.application.provider.application
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -19,7 +21,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
 import com.sprotte.geolocator.demo.R
 import com.sprotte.geolocator.demo.misc.*
-import com.sprotte.geolocator.demo.misc.getSharedPrefs
 import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
@@ -38,10 +39,19 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
     private var geofence = Geofence()
 
+    private var location by sharedPreference(LocationTrackerService.PREFERENCE_LOCATION, LocationResult.create(listOf()))
+
     private val preferenceChangedListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { preferences, key ->
-            val value = preferences.getString(key, "invalid")
-            Logger.v("OnSharedPreferenceChange $key $value")
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+
+            // key has been updated
+            if (key == LocationTrackerService.PREFERENCE_LOCATION) {
+
+                // retrieve location from preferences
+                val locationResult = location
+
+                Logger.v("OnSharedPreferenceChange ${locationResult.lastLocation}")
+            }
         }
 
     override fun subscribeUi() {
@@ -171,8 +181,10 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     private fun removeGeofence(geofence: Geofence) {
         Geofencer(requireContext()).removeGeofence(geofence.id) {
             showGeofences()
-            Snackbar.make(main,
-                R.string.reminder_removed_success, Snackbar.LENGTH_LONG)
+            Snackbar.make(
+                main,
+                R.string.reminder_removed_success, Snackbar.LENGTH_LONG
+            )
                 .show()
         }
     }
