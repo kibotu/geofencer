@@ -182,6 +182,7 @@ Add it in your root build.gradle at the end of repositories:
 
 	dependencies {
 		implementation 'com.github.exozet:Geolocator:latest'
+		implementation 'com.google.android.gms:play-services-location:17.0.0'
 	}
 	
 ### Configuration
