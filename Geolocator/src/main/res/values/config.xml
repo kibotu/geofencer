@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Location Tracker -->
     <integer name="location_update_interval_in_millis">0</integer>
     <integer name="location_fastest_update_interval_in_millis">0</integer>
     <integer name="location_max_wait_time_interval_in_millis">0</integer>
     <integer name="location_min_distance_for_updates_in_meters">0</integer>
+
+    <!-- Geofencer -->
+    <integer name="loitering_delay">1</integer>
+    <integer name="notification_responsiveness">1</integer>
+    <integer name="expiration_duration">-1</integer>
 
 </resources>

@@ -7,8 +7,10 @@ import com.google.android.gms.location.Geofence.Builder
 import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import com.sprotte.geolocator.R
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.geofencer.service.GeofenceBroadcastReceiver
+import com.sprotte.geolocator.utils.*
 import com.sprotte.geolocator.utils.fromJson
 import com.sprotte.geolocator.utils.loge
 import com.sprotte.geolocator.utils.sharedPreference
@@ -90,8 +92,9 @@ class GeofenceRepository(private val context: Context) {
     private fun buildGeofence(geofence: Geofence): com.google.android.gms.location.Geofence {
         return Builder()
             .setRequestId(geofence.id)
-            .setLoiteringDelay(1)
-            .setNotificationResponsiveness(1)
+            .setLoiteringDelay(context.resources.getInteger(R.integer.loitering_delay))
+            .setNotificationResponsiveness(context.resources.getInteger(R.integer.notification_responsiveness))
+            .setExpirationDuration(context.getRes(R.integer.expiration_duration))
             .setCircularRegion(
                 geofence.latitude,
                 geofence.longitude,

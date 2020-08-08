@@ -189,10 +189,16 @@ Add it in your root build.gradle at the end of repositories:
 
 Default Location tracking update intervals can be overriden, by adding following parameter into your _app/res/_ - folder, e.g. [**app/res/config.xml**](app/src/main/res/values/config.xml#L4-L7)
 
+    <!-- Location Tracker -->
     <integer name="location_update_interval_in_millis">0</integer>
     <integer name="location_fastest_update_interval_in_millis">0</integer>
     <integer name="location_max_wait_time_interval_in_millis">0</integer>
     <integer name="location_min_distance_for_updates_in_meters">0</integer>
+
+    <!-- Geofencer -->
+    <integer name="loitering_delay">1</integer>
+    <integer name="notification_responsiveness">1</integer>
+    <integer name="expiration_duration">-1</integer> // -1 == NEVER_EXPIRE
 
 ### Known Issues
 
