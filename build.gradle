@@ -21,7 +21,6 @@ buildscript {
         classpath pluginLibrary.mavenGradle
         classpath plugin.dexcountGradle
 
-        classpath plugin.realm
         classpath pluginLibrary.gradleBintrayPlugin
     }
 }

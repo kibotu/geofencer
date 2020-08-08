@@ -97,6 +97,22 @@ android {
 
     // endregion
 
+    // region bundle config
+
+    bundle {
+        density {
+            enableSplit true
+        }
+        abi {
+            enableSplit true
+        }
+        language {
+            enableSplit false
+        }
+    }
+
+    // endregion
+
     // region lint options https://developer.android.com/studio/write/lint#gradle
 
     lintOptions {
@@ -155,7 +171,9 @@ dependencies {
 
     implementation project(':Geolocator')
 
-    implementation libs.exozetCore
+    implementation (libs.exozetCore) {
+        exclude group: 'io.realm'
+    }
 
     implementation libs.playServicesMaps
 
@@ -167,7 +185,6 @@ dependencies {
     implementation libs.logger
 
     implementation libs.playServicesLocation
-    implementation libs.androidKtxCore
 }
 
 
