@@ -1,5 +1,3 @@
-import java.security.spec.InvalidKeySpecException
-
 ext {
     VERSION_NAME = simpleReleaseVersionName()
     VERSION_CODE = commitCount()
@@ -44,7 +42,7 @@ android {
             }
         }
         catch (final ignored) {
-            throw new InvalidKeySpecException('You should define DEBUG_KEYSTORE_ALLIAS, DEBUG_STORE_PASSWORD, DEBUG_KEY_PASSWORD in gradle.properties.')
+            throw new java.security.spec.InvalidKeySpecException('You should define DEBUG_KEYSTORE_ALLIAS, DEBUG_STORE_PASSWORD, DEBUG_KEY_PASSWORD in gradle.properties.')
         }
         try {
             release {
@@ -54,7 +52,7 @@ android {
                 keyPassword RELEASE_KEY_PASSWORD
             }
         } catch (final ignored) {
-            throw new InvalidKeySpecException('You should define RELEASE_KEYSTORE_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD in gradle.properties.')
+            throw new java.security.spec.InvalidKeySpecException('You should define RELEASE_KEYSTORE_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD in gradle.properties.')
         }
     }
 

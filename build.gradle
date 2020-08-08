@@ -12,7 +12,7 @@ buildscript {
 
     }
     dependencies {
-        classpath plugin.gradleBuildToolsCanary
+        classpath plugin.gradleBuildTools
         classpath plugin.navigationSafeArgs
         classpath plugin.kotlinGradle
         classpath plugin.kotlinApt

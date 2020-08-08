@@ -76,6 +76,11 @@ object LocationTracker {
              * delivered sooner than this interval.
              */
             maxWaitTime = context.getRes(R.integer.location_max_wait_time_interval_in_millis)
+
+            /**
+             * https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest#setSmallestDisplacement(float)
+             */
+            smallestDisplacement = context.getRes(R.integer.location_min_distance_for_updates_in_meters).toFloat()
         }
     }
 
