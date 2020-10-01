@@ -1,5 +1,6 @@
 package com.sprotte.geolocator.tracking
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -53,44 +54,43 @@ object LocationTracker {
      * These settings are appropriate for mapping applications that show real-time location
      * updates.
      */
-    private fun getLocationRequest(context: Context): LocationRequest {
+    private fun getLocationRequest(context: Context, params: LocationTrackerParams = LocationTrackerParams(context)): LocationRequest {
         return LocationRequest().apply {
-            // Sets the desired interval for active location updates. This interval is
-            // inexact. You may not receive updates at all if no location sources are available, or
-            // you may receive them slower than requested. You may also receive updates faster than
-            // requested if other applications are requesting location at a faster interval.
-            // Note: apps running on "O" devices (regardless of targetSdkVersion) may receive updates
-            // less frequently than this interval when the app is no longer in the foreground.
-            interval = context.getRes(R.integer.location_update_interval_in_millis)
-
-            /**
-             * The fastest rate for active location updates. Updates will never be more frequent
-             * than this value, but they may be less frequent.
-             */
-            fastestInterval = context.getRes(R.integer.location_fastest_update_interval_in_millis)
-
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-            /**
-             * The max time before batched results are delivered by location services. Results may be
-             * delivered sooner than this interval.
-             */
-            maxWaitTime = context.getRes(R.integer.location_max_wait_time_interval_in_millis)
-
-            /**
-             * https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest#setSmallestDisplacement(float)
-             */
-            smallestDisplacement = context.getRes(R.integer.location_min_distance_for_updates_in_meters).toFloat()
+            interval = params.interval
+            fastestInterval = params.fastestInterval
+            priority = params.priority
+            maxWaitTime = params.maxWaitTime
+            smallestDisplacement = params.smallestDisplacement
         }
     }
 
     fun requestLocationUpdates(context: Context, clasz: Class<*>) {
+        requestLocationUpdates(context, clasz, LocationTrackerParams(context))
+    }
+
+    /**
+     * Do not forget to add one or both of the following permissions to AndroidManifest
+     *  - ACCESS_COARSE_LOCATION
+     *  - ACCESS_FINE_LOCATION
+     *
+     * Android has two location request settings:
+     * `ACCESS_COARSE_LOCATION` and `ACCESS_FINE_LOCATION`. These settings control
+     * the accuracy of the current location. This sample uses ACCESS_FINE_LOCATION, as defined in
+     * the AndroidManifest.xml.
+     *
+     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
+     * interval (5 seconds), the Fused Location Provider API returns location updates that are
+     * accurate to within a few feet.
+     *
+     */
+    @SuppressLint("MissingPermission")
+    fun requestLocationUpdates(context: Context, clasz: Class<*>, params: LocationTrackerParams = LocationTrackerParams(context)) {
 
         context.getSharedPrefs().edit().putString(PREFS_NAME, clasz.canonicalName).apply()
 
         try {
             log("Starting location updates")
-            LocationServices.getFusedLocationProviderClient(context).requestLocationUpdates(getLocationRequest(context), getTrackingPendingIntent(context))
+            LocationServices.getFusedLocationProviderClient(context).requestLocationUpdates(getLocationRequest(context, params), getTrackingPendingIntent(context))
         } catch (e: SecurityException) {
             log(e.message)
         }
