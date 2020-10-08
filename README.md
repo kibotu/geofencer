@@ -184,11 +184,12 @@ Add it in your root build.gradle at the end of repositories:
 		implementation 'com.github.exozet:Geolocator:latest'
 		implementation 'com.google.android.gms:play-services-location:17.0.0'
 	}
-	
+
 ### Configuration
 
 Default Location tracking update intervals can be overriden, by adding following parameter into your _app/res/_ - folder, e.g. [**app/res/config.xml**](app/src/main/res/values/config.xml#L4-L7)
 
+``` xml
     <!-- Location Tracker -->
     <integer name="location_update_interval_in_millis">0</integer>
     <integer name="location_fastest_update_interval_in_millis">0</integer>
@@ -199,6 +200,23 @@ Default Location tracking update intervals can be overriden, by adding following
     <integer name="loitering_delay">1</integer>
     <integer name="notification_responsiveness">1</integer>
     <integer name="expiration_duration">-1</integer> // -1 == NEVER_EXPIRE
+```
+
+You can also set this values at runtime in some step before call method `requestLocationUpdates`
+
+``` java
+    int interval = 1000;
+    int fastestInterval = 2000;
+    int priority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    int maxWaitTime = 10000;
+    int smallestDisplacement = 20;
+
+    LocationTrackerParams locationTrackerParams = new LocationTrackerParams(
+            interval, fastestInterval, priority, maxWaitTime, smallestDisplacement);
+
+    LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class, locationTrackerParams);
+```
+> LocationTrackerParams is a open class for kotlin or a not final class for java, so if you don't need to setup all params you can extend it.
 
 ### Known Issues
 
@@ -210,3 +228,5 @@ Default Location tracking update intervals can be overriden, by adding following
 [Jan Rabe](jan.rabe@exozet.com)
 
 [Paul Sprotte](paul.sprotte@exozet.com)
+
+[AgnaldoNP] (https://github.com/AgnaldoNP)
