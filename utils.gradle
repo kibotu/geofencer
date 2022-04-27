@@ -1,0 +1,275 @@
+// region versioning
+
+def logd(message) {
+    if (LOG_UTILS == true)
+        println(message)
+}
+
+def commitHash() {
+    description = "git log -n 1 --format='%h'"
+    logd(description)
+    final def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'log', '-n', '1', "--format='%h'"
+        standardOutput = stdout
+    }
+    logd("Git Hash" + stdout.toString())
+    return stdout.toString().trim().replaceAll('\'', '')
+}
+
+def commitCount() {
+    final def stdout = new ByteArrayOutputStream()
+    description = "git rev-list --full-history --all"
+    logd(description)
+    exec {
+        commandLine 'git', 'rev-list', '--full-history', '--all'
+        standardOutput = stdout
+    }
+    final String output = stdout.toString()
+    final List<String> commits = output.split("\n")
+    logd("Version Code: " + commits.size())
+    return commits.size()
+}
+
+def simpleReleaseVersionName() {
+    description = "Creating release version name. Format: major.minor.build"
+    logd(description)
+
+    def tag = System.getenv("BITRISE_GIT_TAG")
+    if (tag != null)
+        return tag
+
+    final def buildNumber = buildNumberByCI()
+    def releaseName = branchName()
+    // remove 'origin' in from branch name
+    if (releaseName != null && releaseName.contains("origin/"))
+        releaseName = releaseName.replace("origin/", "")
+
+    if (releaseName.contains("release"))
+        releaseName = releaseName.replaceFirst(".*release.*\\/", "")
+    else
+        releaseName = VERSION_NAME
+
+    if (releaseName.count(".") < 2) {
+        if (buildNumber != null)
+            releaseName += "." + buildNumber
+        else
+            releaseName += "." + 0
+    }
+
+    logd("Version Name: " + releaseName)
+    return releaseName
+}
+
+def canonicalReleaseVersionName() {
+    description = "Creating release version name. Format: branch/major.minor.build-commithash"
+    logd(description)
+    final def buildNumber = buildNumberByCI()
+    def releaseName = branchName()
+
+    // remove 'origin' in from branch name
+    if (releaseName != null && releaseName.contains("origin/"))
+        releaseName = releaseName.replace("origin/", "")
+
+    if (!releaseName.contains("release"))
+        releaseName += "/" + VERSION_NAME
+
+    if (releaseName.count(".") < 2) {
+        if (buildNumber != null) {
+            releaseName += "." + buildNumber
+        } else {
+            releaseName += ".0"
+        }
+    }
+
+    releaseName += "-" + commitHash()
+    logd('Version Name: ' + releaseName)
+    return releaseName
+}
+
+def buildNumberByCI() {
+    description = 'Getting build number from Jenkins, Travis or Bitrise.'
+    logd(description)
+    final def env = System.getenv()
+    if (env.BITRISE_BUILD_NUMBER != null)
+        return Integer.parseInt(env.BITRISE_BUILD_NUMBER)
+    if (env.BUILD_NUMBER != null)
+        return Integer.parseInt(env.BUILD_NUMBER)
+    if (env.TRAVIS_BUILD_NUMBER != null)
+        return Integer.parseInt(env.TRAVIS_BUILD_NUMBER)
+    return 0
+}
+
+def branchName() {
+    description = 'Getting branch name from CI or from git directly.'
+    logd(description)
+    def branchName = branchNameByCI()
+    if (branchName == null)
+        branchName = branchNameByGit()
+    return branchName
+}
+
+def branchNameByCI() {
+    description = 'Getting build number from Jenkins, Travis or Bitrise.'
+    logd(description)
+    final def env = System.getenv()
+    if (env.BITRISE_GIT_BRANCH != null)
+        return env.BITRISE_GIT_BRANCH
+    if (env.GIT_BRANCH != null)
+        return env.GIT_BRANCH
+    if (env.TRAVIS_BRANCH != null)
+        return env.TRAVIS_BRANCH
+    return null
+}
+
+def branchNameByGit() {
+    final def stdout = new ByteArrayOutputStream()
+    description = 'git rev-parse --abbrev-ref HEAD'
+    logd(description)
+    exec {
+        commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+        standardOutput = stdout
+    }
+    final String output = stdout.toString().trim()
+    logd('Branch Name: ' + output)
+    return output
+}
+
+def gitLog() {
+    description = "git log --pretty=format:'[[%h]] %cn %s'"
+    logd(description)
+    final def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'log', "--pretty=format:'[[%h]] %cn %s'"
+        standardOutput = stdout
+    }
+
+    return stdout.toString().trim()
+}
+
+def generateReleaseNotes() {
+    final String filePath = "${project.rootDir}/app/src/main/assets/RELEASE.md"
+
+    description = "Generate release notes. [" + filePath + "]"
+    logd(description)
+
+    final def env = System.getenv()
+    env.each { final key, final value -> println "$key = $value" }
+
+    def assetFolder = new File("${project.rootDir}/app/src/main/assets/")
+    if (!assetFolder.exists())
+        assetFolder.mkdirs()
+
+    final def output = new File(filePath)
+
+    def notes = 'Internal Release.'
+
+    output.write(notes)
+
+    logd new File(filePath).getText('UTF-8')
+}
+
+def generateEnvironmentLog() {
+    final String filePath = "${project.rootDir}/app/src/main/assets/ENVIRONMENT.md"
+
+    description = "Generate environemnt log. [" + filePath + "]"
+    logd(description)
+
+    def assetFolder = new File("${project.rootDir}/app/src/main/assets/")
+    if (!assetFolder.exists())
+        assetFolder.mkdirs()
+
+    final def output = new File(filePath)
+
+    def notes = System.getenv().toString()
+
+    output.write(notes)
+
+    logd new File(filePath).getText('UTF-8')
+}
+
+def generateChangelog() {
+    final String filePath = "${project.rootDir}/app/src/main/assets/CHANGELOG.md"
+
+    description = "Generate Changelog. [" + filePath + "]"
+    logd(description)
+
+    def log = gitLog()
+
+    StringBuilder builder = new StringBuilder()
+
+    Scanner scanner = new Scanner(log)
+    while (scanner.hasNextLine()) {
+        def line = scanner.nextLine()
+        def commit = line.subSequence(1, line.length() - 1)
+        def hash = commit.subSequence(commit.indexOf("[[") + 2, commit.indexOf("]]"))
+        def message = commit.replaceFirst("\\[\\[$hash\\]\\]", "<a href=\"${VSC_PATH}commits/$hash\">#$hash</a>")
+        builder.append(message).append("\r\n").append("\r\n")
+    }
+
+    def assetFolder = new File("${project.rootDir}/app/src/main/assets/")
+    if (!assetFolder.exists())
+        assetFolder.mkdirs()
+
+    final def output = new File(filePath)
+    output.write(builder.toString())
+
+    // logd new File(filePath).getText('UTF-8')
+}
+
+def runCommand(sh, cmd) {
+    logd "Running command $cmd"
+    def sout = new ByteArrayOutputStream()
+    project.exec {
+        commandLine = [sh, cmd]
+        standardOutput = sout
+    }
+    return sout.toString()
+}
+
+def connectDevice() {
+    Properties properties = new Properties()
+    try {
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    }
+    catch (ignored) {
+        return
+    }
+    def deviceIp = properties.getProperty('deviceIp')?.replace('\"', "")
+
+    if (deviceIp == null || deviceIp.length() < 0)
+        return
+
+    description = "adb connect " + deviceIp
+    logd(description)
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        executable android.getAdbExe().toString()
+        args = ['connect', deviceIp]
+        standardOutput = stdout
+    }
+    def result = stdout.toString().trim()
+
+    if (result.contains("unable to connect"))
+        throw new GradleException(result)
+    else
+        println(result)
+}
+
+ext {
+    generateEnvironmentLog = this.&generateEnvironmentLog
+    printGitLog = this.&printGitLog
+    commitHash = this.&commitHash
+    commitCount = this.&commitCount
+    simpleReleaseVersionName = this.&simpleReleaseVersionName
+    canonicalReleaseVersionName = this.&canonicalReleaseVersionName
+    buildNumberByCI = this.&buildNumberByCI
+    branchName = this.&branchName
+    branchNameByCI = this.&branchNameByCI
+    branchNameByGit = this.&branchNameByGit
+    gitLog = this.&gitLog
+    generateReleaseNotes = this.&generateReleaseNotes
+    generateChangelog = this.&generateChangelog
+    runCommand = this.&runCommand
+    connectDevice = this.&connectDevice
+}

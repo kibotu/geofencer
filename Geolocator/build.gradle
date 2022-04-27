@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-//apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'maven-publish'
 
 
 android {
@@ -13,8 +14,6 @@ android {
 
         minSdkVersion minSdkVer
         targetSdkVersion targetSdkVer
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndrSharedPreferenceDelegateoidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -71,6 +70,20 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation libs.gson
     implementation libs.playServicesLocation
-    implementation libs.androidKtxCore
+    implementation libs.coreKtx
     implementation libs.preferenceKtx
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "com.github.exozet"
+                artifactId = 'Geolocator'
+                version = "2.0.0"
+            }
+        }
+    }
+}
+

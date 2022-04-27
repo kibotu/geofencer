@@ -133,43 +133,32 @@ dependencies {
 
     implementation project(':Geolocator')
 
-    implementation libs.supportMultidex
-    implementation libs.preferenceKtx
-    implementation libs.gson
-
-    implementation libs.supportAppCompat
-    implementation libs.appCompatResources
-    implementation libs.androidKtxCore
-    implementation libs.activityKtx
-    implementation libs.fragmentKtx
-    implementation libs.supportDesign
-    implementation libs.constraintLayout2
-    implementation libs.supportAnnotations
-    implementation libs.supportVectorDrawable
-
-    implementation libs.androidKtxNavigationCommon
-    implementation libs.androidKtxNavigationFragment
-    implementation libs.androidKtxNavigationUi
-    implementation libs.androidKtxNavigationRuntime
-
     implementation libs.applicationProvider
     implementation libs.androidResourceExtensions
 
-    implementation libs.mapsUtilsKtx
-    implementation libs.mapsKtx
-    implementation libs.playServicesMaps
-
+    implementation libs.rxpermissions
     implementation libs.rx2java
     implementation libs.rx2Android
     implementation libs.rx2Kotlin
 
-    implementation libs.rxpermissions
-
+    implementation libs.gson
     implementation libs.timber
 
+    implementation libs.mapsUtilsKtx
+    implementation libs.mapsKtx
+    implementation libs.playServicesMaps
     implementation libs.playServicesLocation
-}
 
+    implementation libs.navigationUiKtx
+    implementation libs.navigationFragmentKtx
+
+    implementation libs.preferenceKtx
+
+    implementation libs.appcompat
+    implementation libs.coreKtx
+    implementation libs.material
+    implementation libs.constraintLayout
+}
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 60, 'minutes'
