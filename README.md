@@ -1,12 +1,12 @@
 # Geofencer 
-[![Build Status](https://app.bitrise.io/app/62c5e7d6d14d57dd/status.svg?token=i0sTxq2L3WeD26_b77uA5A)](https://app.bitrise.io/app/62c5e7d6d14d57dd) [ ![Download](https://api.bintray.com/packages/exozetag/maven/Geolocator/images/download.svg) ](https://bintray.com/exozetag/maven/Geolocator/_latestVersion) [![](https://jitpack.io/v/exozet/Geolocator.svg)](https://jitpack.io/#exozet/Geolocator) [![](https://jitpack.io/v/exozet/Geolocator/month.svg)](https://jitpack.io/#exozet/Geolocator) [![Hits-of-Code](https://hitsofcode.com/github/exozet/Geolocator)](https://hitsofcode.com/view/github/exozet/Geolocator)
+[![Build Status](https://app.bitrise.io/app/62c5e7d6d14d57dd/status.svg?token=i0sTxq2L3WeD26_b77uA5A)](https://app.bitrise.io/app/62c5e7d6d14d57dd) [![](https://jitpack.io/v/exozet/Geolocator.svg)](https://jitpack.io/#exozet/Geolocator) [![](https://jitpack.io/v/exozet/Geolocator/month.svg)](https://jitpack.io/#exozet/Geolocator) [![Hits-of-Code](https://hitsofcode.com/github/exozet/Geolocator)](https://hitsofcode.com/view/github/exozet/Geolocator)
 [![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15) [![Gradle Version](https://img.shields.io/badge/gradle-6.5.1-green.svg)](https://docs.gradle.org/current/release-notes) [![Kotlin](https://img.shields.io/badge/kotlin-1.3.72-green.svg)](https://kotlinlang.org/) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Geolocator-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/7860)
 
-Convience library to receive user location updates and geofence events with minimal effort. 
+Convenience library to receive user location updates and geofence events with minimal effort.
 
-Features:
+### Features
 
-- supports Android-Q
+- supports Android-R
 - receive updates on background
 - receive updates if app got killed
 - geofence updates (dwell, enter, exit)
@@ -15,7 +15,7 @@ Features:
 
 ![sample.gif](sample.gif)
      
-### Requirmenets
+### Requirements
 
 1. Location permissions in [*AndroidManifest.xml*](app/src/main/AndroidManifest.xml#L8-L9)
 

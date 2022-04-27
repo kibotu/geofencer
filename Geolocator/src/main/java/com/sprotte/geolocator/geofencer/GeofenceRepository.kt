@@ -1,5 +1,6 @@
 package com.sprotte.geolocator.geofencer
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -27,12 +28,13 @@ class GeofenceRepository(private val context: Context) {
             context,
             Geofencer.REQUEST_CODE,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
     var geofenceString by context.sharedPreference(Geofencer.PREFS_NAME, "")
 
+    @SuppressLint("MissingPermission")
     fun add(
         geofence: Geofence,
         success: () -> Unit) {
@@ -59,7 +61,7 @@ class GeofenceRepository(private val context: Context) {
 
     fun removeAll(
         success: () -> Unit) {
-        geofencingClient?.removeGeofences(geofencePendingIntent)?.run {
+        geofencingClient.removeGeofences(geofencePendingIntent).run {
             addOnSuccessListener {
                 geofenceString = ""
                 success()

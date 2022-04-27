@@ -15,9 +15,6 @@ import com.sprotte.geolocator.geofencer.Geofencer;
 import com.sprotte.geolocator.geofencer.models.Geofence;
 import com.sprotte.geolocator.tracking.LocationTracker;
 
-import net.kibotu.logger.Level;
-import net.kibotu.logger.LogcatLogger;
-import net.kibotu.logger.Logger;
 
 import java.util.UUID;
 
@@ -33,7 +30,6 @@ public class AddGeoFenceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        Logger.addLogger(new LogcatLogger(), Level.VERBOSE);
 
         UtilsKt.requestLocationPermission(this, permission ->
         {

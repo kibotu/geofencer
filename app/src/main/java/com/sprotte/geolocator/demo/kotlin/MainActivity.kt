@@ -9,8 +9,6 @@ import com.sprotte.geolocator.demo.R
 import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
-import net.kibotu.logger.LogcatLogger
-import net.kibotu.logger.Logger
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -18,7 +16,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Logger.addLogger(LogcatLogger())
 
 //        requestLocationPermission {
 //            if (it.granted) {

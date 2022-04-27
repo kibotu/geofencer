@@ -1,17 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.getkeepsafe.dexcount'
-apply plugin: 'com.github.dcendents.android-maven'
+//apply plugin: 'com.getkeepsafe.dexcount'
 
 
 android {
-
-    // @Parcelize
-    androidExtensions {
-        experimental = true
-    }
 
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
@@ -23,7 +16,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndrSharedPreferenceDelegateoidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
@@ -38,8 +31,8 @@ android {
     // region java compiler flags
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     // endregion
@@ -47,7 +40,7 @@ android {
     // region compile options
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11
     }
 
     // endregion
@@ -65,15 +58,6 @@ android {
 
     // endregion
 
-    // region dex options
-
-    dexOptions {
-        javaMaxHeapSize "4g"
-        maxProcessCount 8
-    }
-
-    // endregion
-
     // region adb options
 
     adbOptions {
@@ -81,32 +65,12 @@ android {
     }
 
     // endregion
-
-    // region exclude duplicated meta inf files
-
-    packagingOptions {
-        exclude 'META-INF/library-core_release.kotlin_module'
-        exclude 'META-INF/lib_release.kotlin_module'
-    }
-
-    // endregion
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation libs.kotlinJdk8
     implementation libs.gson
     implementation libs.playServicesLocation
     implementation libs.androidKtxCore
-}
-
-configurations.all {
-    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
-    resolutionStrategy.force libs.kotlinJdk8
-}
-
-apply from: "${project.rootDir}/Android-Dependencies/javadoc.gradle"
-
-if (project.rootProject.file('bintray.properties').exists()) {
-    apply from: "${project.rootDir}/Android-Dependencies/bintray.gradle"
+    implementation libs.preferenceKtx
 }

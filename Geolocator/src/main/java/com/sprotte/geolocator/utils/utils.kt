@@ -8,7 +8,7 @@ package com.sprotte.geolocator.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.gson.Gson

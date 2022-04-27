@@ -11,7 +11,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -70,21 +70,19 @@ fun showGeofenceInMap(
         R.drawable.ic_twotone_location_on_48px
     )
     val marker = map.addMarker(MarkerOptions().position(latLng).icon(vectorToBitmap))
-    marker.tag = geofence.id
-    if (geofence.radius != null) {
-        val radius = geofence.radius as Double
-        map.addCircle(
-            CircleOptions()
-                .center(latLng)
-                .radius(radius)
-                .strokeColor(ContextCompat.getColor(context,
-                    R.color.colorAccent
-                ))
-                .fillColor(ContextCompat.getColor(context,
-                    R.color.colorReminderFill
-                ))
-        )
-    }
+    marker?.tag = geofence.id
+    val radius = geofence.radius
+    map.addCircle(
+        CircleOptions()
+            .center(latLng)
+            .radius(radius)
+            .strokeColor(ContextCompat.getColor(context,
+                R.color.colorAccent
+            ))
+            .fillColor(ContextCompat.getColor(context,
+                R.color.colorReminderFill
+            ))
+    )
 
 }
 
@@ -113,7 +111,7 @@ fun sendNotification(context: Context, title: String, message: String) {
         .addParentStack(MainActivity::class.java)
         .addNextIntent(intent)
     val notificationPendingIntent = stackBuilder
-        .getPendingIntent(getUniqueId(), PendingIntent.FLAG_UPDATE_CURRENT)
+        .getPendingIntent(getUniqueId(),  PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     val notification = NotificationCompat.Builder(context,
         NOTIFICATION_CHANNEL_ID

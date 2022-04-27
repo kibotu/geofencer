@@ -10,6 +10,7 @@
 
 
     <application
+        android:name=".App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -29,6 +30,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
+            android:exported="true"
             android:name=".kotlin.MainActivity"
             android:launchMode="singleInstance">
 
@@ -43,16 +45,19 @@
         </activity>
 
         <service
+            android:exported="false"
             android:name=".kotlin.GeofenceIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
+            android:exported="false"
             android:name=".kotlin.LocationTrackerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <!-- java version -->
 
         <activity
+            android:exported="false"
             android:name=".java.AddGeoFenceActivity"
             android:launchMode="singleInstance">
 
@@ -61,9 +66,12 @@
         </activity>
 
         <service
+            android:exported="false"
             android:name=".java.GeofenceIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
         <service
+            android:exported="false"
             android:name=".java.LocationTrackerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 

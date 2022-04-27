@@ -8,14 +8,8 @@ ext {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
-
-    // parcilze
-    androidExtensions {
-        experimental = true
-    }
 
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
@@ -83,8 +77,8 @@ android {
     // region compile options
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     // endregion
@@ -92,7 +86,7 @@ android {
     // region compile options
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11
     }
 
     // endregion
@@ -129,30 +123,19 @@ android {
 
     // endregion
 
-    // region dex options
-
-    dexOptions {
-        javaMaxHeapSize "4g"
-        maxProcessCount 8
+    buildFeatures {
+        viewBinding true
     }
-
-    // endregion
-
-    // region exclude duplicated meta inf files
-
-    packagingOptions {
-        exclude 'META-INF/library-core_release.kotlin_module'
-        exclude 'META-INF/lib_release.kotlin_module'
-    }
-
-    // endregion
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    implementation project(':Geolocator')
+
     implementation libs.supportMultidex
-    implementation libs.kotlinJdk8
+    implementation libs.preferenceKtx
+    implementation libs.gson
 
     implementation libs.supportAppCompat
     implementation libs.appCompatResources
@@ -169,12 +152,11 @@ dependencies {
     implementation libs.androidKtxNavigationUi
     implementation libs.androidKtxNavigationRuntime
 
-    implementation project(':Geolocator')
+    implementation libs.applicationProvider
+    implementation libs.androidResourceExtensions
 
-    implementation (libs.exozetCore) {
-        exclude group: 'io.realm'
-    }
-
+    implementation libs.mapsUtilsKtx
+    implementation libs.mapsKtx
     implementation libs.playServicesMaps
 
     implementation libs.rx2java
@@ -182,14 +164,13 @@ dependencies {
     implementation libs.rx2Kotlin
 
     implementation libs.rxpermissions
-    implementation libs.logger
+
+    implementation libs.timber
 
     implementation libs.playServicesLocation
 }
 
 
 configurations.all {
-    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
-
-    resolutionStrategy.force libs.kotlinJdk8
+    resolutionStrategy.cacheDynamicVersionsFor 60, 'minutes'
 }

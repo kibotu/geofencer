@@ -3,25 +3,16 @@ buildscript {
     apply from: "${project.rootDir}/Android-Dependencies/dependencies.gradle"
 
     repositories {
-        // https://storage-download.googleapis.com/maven-central/index.html
-        maven { url 'https://maven-central-eu.storage-download.googleapis.com/repos/central/data/' }
         google()
-        maven { url 'https://plugins.gradle.org/m2/' }
-        maven { url 'https://maven.fabric.io/public' }
         mavenCentral()
+        maven { url 'https://jitpack.io' }
 
     }
     dependencies {
-        classpath plugin.gradleBuildTools
-        classpath plugin.navigationSafeArgs
+        classpath plugin.buildGradleTools
         classpath plugin.kotlinGradle
-        classpath plugin.kotlinApt
         classpath plugin.gms
-        classpath plugin.fabric
-        classpath pluginLibrary.mavenGradle
         classpath plugin.dexcountGradle
-
-        classpath pluginLibrary.gradleBintrayPlugin
     }
 }
 
@@ -30,14 +21,9 @@ allprojects {
     apply from: "${project.rootDir}/Android-Dependencies/utils.gradle"
 
     repositories {
-        // https://storage-download.googleapis.com/maven-central/index.html
-        maven { url 'https://maven-central-eu.storage-download.googleapis.com/repos/central/data/' }
         google()
-        maven { url 'https://plugins.gradle.org/m2/' }
+        mavenCentral()
         maven { url 'https://jitpack.io' }
-
-        maven { url 'https://dl.bintray.com/exozetag/maven' } // todo remove once threesixty player is in jcenter
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
 }
 

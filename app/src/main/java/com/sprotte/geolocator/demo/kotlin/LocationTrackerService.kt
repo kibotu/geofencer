@@ -1,8 +1,8 @@
 package com.sprotte.geolocator.demo.kotlin
 
-import com.exozet.android.core.gson.toJson
-import com.exozet.android.core.storage.sharedPreference
 import com.google.android.gms.location.LocationResult
+import com.sprotte.geolocator.demo.misc.sharedPreference
+import com.sprotte.geolocator.demo.misc.toJson
 import com.sprotte.geolocator.tracking.service.LocationTrackerUpdateIntentService
 
 

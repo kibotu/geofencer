@@ -2,20 +2,19 @@ package com.sprotte.geolocator.demo.kotlin
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.content.SharedPreferences
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.core.content.getSystemService
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.exozet.android.core.base.BaseFragment
-import com.exozet.android.core.gson.fromJson
-import com.exozet.android.core.gson.toJson
-import com.exozet.android.core.storage.sharedPreference
-import com.github.florent37.application.provider.application
-import com.google.android.gms.location.LocationResult
+import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -23,22 +22,20 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
 import com.sprotte.geolocator.demo.R
+import com.sprotte.geolocator.demo.databinding.FragmentMapBinding
 import com.sprotte.geolocator.demo.misc.*
 import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
-import kotlinx.android.synthetic.main.fragment_map.*
-import net.kibotu.logger.Logger
+import timber.log.Timber
 import kotlin.math.roundToInt
 
 
-class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
+class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
-    override val layout = R.layout.fragment_map
+    private var binding: FragmentMapBinding? = null
 
     private var map: GoogleMap? = null
-
-    private lateinit var locationManager: LocationManager
 
     private var geofence = Geofence()
 
@@ -68,24 +65,33 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
                 // lastLocation.speed
                 // lastLocation.bearing
 
-                Logger.v("OnSharedPreferenceChange 1 $locationResult")
+                Timber.v("OnSharedPreferenceChange 1 $locationResult")
             }
         }
 
-    override fun subscribeUi() {
-        super.subscribeUi()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = FragmentMapBinding.inflate(inflater, container, false).also {
+        binding = it
+    }.root
 
-        this.context?.getSharedPrefs()?.registerOnSharedPreferenceChangeListener(preferenceChangedListener)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding?.setup()
+
+        requireContext().getSharedPrefs().registerOnSharedPreferenceChangeListener(preferenceChangedListener)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun FragmentMapBinding.setup() {
 
         newReminder.isGone = true
         currentLocation.isGone = true
 
-        locationManager = application?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-
         currentLocation.setOnClickListener {
-            val bestProvider = locationManager.getBestProvider(Criteria(), false)
+
+            val locationManager = requireContext().getSystemService<LocationManager>() ?: return@setOnClickListener
+            val bestProvider = locationManager.getBestProvider(Criteria(), false) ?: return@setOnClickListener
+
             @SuppressLint("MissingPermission")
             val location = locationManager.getLastKnownLocation(bestProvider)
             if (location != null) {
@@ -97,9 +103,10 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         newReminder.setOnClickListener {
             showConfigureLocationStep()
         }
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
         mapFragment.getMapAsync { map ->
-            this.map = map
+            this@MapFragment.map = map
             requireActivity().requestLocationPermission {
 
                 LocationTracker.removeLocationUpdates(requireContext())
@@ -115,27 +122,25 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
                     val location = getLastKnownLocation()
                     if (location != null) {
                         val latLng = LatLng(location.latitude, location.longitude)
-                        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                     }
                     showGeofences()
                 }
             }
-            onMapReady(map)
+            map.onMapReady()
         }
     }
 
-    override fun unsubscribeUi() {
-        super.unsubscribeUi()
+    override fun onDestroyView() {
         map = null
+        binding = null
+        super.onDestroyView()
     }
 
-    fun onMapReady(googleMap: GoogleMap) {
-
-        with(googleMap) {
-            uiSettings.isMyLocationButtonEnabled = false
-            uiSettings.isMapToolbarEnabled = false
-            setOnMarkerClickListener(this@MapFragment)
-        }
+    private fun GoogleMap.onMapReady() {
+        uiSettings.isMyLocationButtonEnabled = false
+        uiSettings.isMapToolbarEnabled = false
+        setOnMarkerClickListener(this@MapFragment)
     }
 
     @SuppressLint("MissingPermission")
@@ -144,7 +149,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
             if (it.granted) {
                 Geofencer(requireContext())
                     .addGeofence(geofence, GeofenceIntentService::class.java) {
-                        container.isGone = true
+                        binding?.container?.isGone = true
                         showGeofences()
                     }
             }
@@ -153,14 +158,14 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
     private fun showGeofenceUpdate() {
         map?.clear()
-        showGeofenceInMap(context!!, map!!, geofence)
+        showGeofenceInMap(requireContext(), map!!, geofence)
     }
 
     private fun showGeofences() {
         map?.run {
             clear()
             for (geofence in Geofencer(requireContext()).getAll()) {
-                showGeofenceInMap(context!!, this, geofence)
+                showGeofenceInMap(requireContext(), this, geofence)
             }
         }
     }
@@ -168,13 +173,13 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
     override fun onMarkerClick(marker: Marker): Boolean {
         val geofence = Geofencer(requireContext()).get(marker.tag as String)
         if (geofence != null) {
-            showGeofenceRemoveAlert(geofence)
+            binding?.showGeofenceRemoveAlert(geofence)
         }
         return true
     }
 
-    private fun showGeofenceRemoveAlert(geofence: Geofence) {
-        val alertDialog = AlertDialog.Builder(context!!).create()
+    private fun FragmentMapBinding.showGeofenceRemoveAlert(geofence: Geofence) {
+        val alertDialog = AlertDialog.Builder(requireContext()).create()
         alertDialog.run {
             setMessage(getString(R.string.reminder_removal_alert))
             setButton(
@@ -194,7 +199,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
-    private fun removeGeofence(geofence: Geofence) {
+    private fun FragmentMapBinding.removeGeofence(geofence: Geofence) {
         Geofencer(requireContext()).removeGeofence(geofence.id) {
             showGeofences()
             Snackbar.make(
@@ -204,7 +209,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
-    private fun showConfigureLocationStep() {
+    private fun FragmentMapBinding.showConfigureLocationStep() {
         container.isVisible = true
         marker.isVisible = true
         instructionTitle.isVisible = true
@@ -221,7 +226,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         showGeofenceUpdate()
     }
 
-    private fun showConfigureRadiusStep() {
+    private fun FragmentMapBinding.showConfigureRadiusStep() {
         marker.isGone = true
         instructionTitle.isVisible = true
         instructionSubtitle.isGone = true
@@ -238,7 +243,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         showGeofenceUpdate()
     }
 
-    private fun showConfigureMessageStep() {
+    private fun FragmentMapBinding.showConfigureMessageStep() {
         marker.isGone = true
         instructionTitle.isVisible = true
         instructionSubtitle.isGone = true
@@ -247,7 +252,7 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         message.isVisible = true
         instructionTitle.text = getString(R.string.instruction_message_description)
         next.setOnClickListener {
-            hideKeyboard(context!!, message)
+            hideKeyboard(requireContext(), message)
             geofence.message = message.text.toString()
 
             if (geofence.message.isNullOrEmpty()) {
@@ -268,12 +273,12 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
         override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            updateRadiusWithProgress(progress)
+            binding?.updateRadiusWithProgress(progress)
             showGeofenceUpdate()
         }
     }
 
-    private fun updateRadiusWithProgress(progress: Int) {
+    private fun FragmentMapBinding.updateRadiusWithProgress(progress: Int) {
         val radius = getRadius(progress)
         geofence.radius = radius
         radiusDescription.text =
@@ -282,11 +287,12 @@ class MapFragment : BaseFragment(), GoogleMap.OnMarkerClickListener {
 
     @SuppressLint("MissingPermission")
     private fun getLastKnownLocation(): Location? {
+        val locationManager = requireContext().getSystemService<LocationManager>() ?: return null
         val providers = locationManager.getProviders(true)
         var bestLocation: Location? = null
         for (provider in providers) {
             val l = locationManager.getLastKnownLocation(provider) ?: continue
-            if (bestLocation == null || l.getAccuracy() < bestLocation!!.getAccuracy()) {
+            if (bestLocation == null || l.accuracy < bestLocation.accuracy) {
                 bestLocation = l
             }
         }

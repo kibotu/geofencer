@@ -3,7 +3,7 @@ package com.sprotte.geolocator.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
