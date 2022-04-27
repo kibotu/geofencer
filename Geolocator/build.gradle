@@ -74,6 +74,14 @@ dependencies {
     implementation libs.preferenceKtx
 }
 
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor 120, 'minutes'
+
+    (libs).each {
+        resolutionStrategy.force it.value
+    }
+}
+
 afterEvaluate {
     publishing {
         publications {

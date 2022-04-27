@@ -161,5 +161,9 @@ dependencies {
 }
 
 configurations.all {
-    resolutionStrategy.cacheDynamicVersionsFor 60, 'minutes'
+    resolutionStrategy.cacheDynamicVersionsFor 120, 'minutes'
+
+    (libs).each {
+        resolutionStrategy.force it.value
+    }
 }
