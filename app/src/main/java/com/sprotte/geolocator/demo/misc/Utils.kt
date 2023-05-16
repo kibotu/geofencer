@@ -212,28 +212,3 @@ fun FragmentActivity.requestBackgroundLocationPermission(block: (permission: Per
     })
 
 
-internal fun FragmentActivity.showTwoButtonDialog(rationalMessage: String, block: (Boolean) -> Unit){
-    StartGameDialogFragment(rationalMessage, block).show(supportFragmentManager,"twoButtonDialog")
-}
-
-class StartGameDialogFragment(val rationalMessage: String, val block: (Boolean) -> Unit = { }) : DialogFragment() {
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return activity?.let {
-            // Use the Builder class for convenient dialog construction
-            val builder = AlertDialog.Builder(it)
-            builder.setMessage(rationalMessage)
-                .setPositiveButton(
-                    com.sprotte.geolocator.R.string.button_allow
-                ) { _, _ ->
-                    block(true)
-                }
-                .setNegativeButton(
-                    com.sprotte.geolocator.R.string.button_reject
-                ) { _, _ ->
-                    block(false)
-                }
-            // Create the AlertDialog object and return it
-            builder.create()
-        } ?: throw IllegalStateException("Activity cannot be null")
-    }
-}

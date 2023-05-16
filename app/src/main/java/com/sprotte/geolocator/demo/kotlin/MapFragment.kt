@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.getSystemService
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -29,6 +30,7 @@ import com.sprotte.geolocator.demo.misc.*
 import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
+import com.sprotte.geolocator.utils.showTwoButtonDialog
 import com.tbruyelle.rxpermissions2.Permission
 import timber.log.Timber
 import kotlin.math.roundToInt
@@ -110,7 +112,36 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
             belowAndroid11Flow()
         } else android11AndAboveFlow()
+    }
 
+    private var hasShownPNRational = false
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if(isGranted) {
+                // PN is not granted, now ask for location permission
+                requestLocationPermissionLambda()
+                return@registerForActivityResult
+            }
+            if(shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS) ){
+                if(!hasShownPNRational)  {
+                    hasShownPNRational = true
+                    askForPNRationale()
+                } else {
+                    // PN is not granted even after rationale dialog, now asking for location permission
+                    requestLocationPermissionLambda()
+                }
+                return@registerForActivityResult
+            }
+        }
+
+    private val askForPNRationale: ()-> Unit = {
+        requireActivity().showTwoButtonDialog(getString(R.string.dialog_rationale_permission)) {
+            if(it){
+                // ask again after rationale user action is positive
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 
     private val preferenceChangedListener =
@@ -140,6 +171,8 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         requireContext().getSharedPrefs().registerOnSharedPreferenceChangeListener(preferenceChangedListener)
     }
 
+
+
     @SuppressLint("MissingPermission")
     private fun FragmentMapBinding.setup() {
         newReminder.isGone = true
@@ -165,7 +198,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
         mapFragment.getMapAsync { map ->
             this@MapFragment.map = map
-            requestLocationPermissionLambda()
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             map.onMapReady()
         }
     }
