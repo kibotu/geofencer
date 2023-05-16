@@ -1,6 +1,7 @@
 package com.sprotte.geolocator.demo.misc
 
 import android.Manifest
+import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -11,16 +12,19 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
+import android.os.Bundle
 import androidx.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.annotation.DrawableRes
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
@@ -30,6 +34,7 @@ import com.sprotte.geolocator.demo.kotlin.MainActivity
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.tbruyelle.rxpermissions2.Permission
 import com.tbruyelle.rxpermissions2.RxPermissions
+import io.reactivex.disposables.Disposable
 
 fun EditText.requestFocusWithKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -153,13 +158,82 @@ internal fun Context.getSharedPrefs(): SharedPreferences {
     return sharedPreferences
 }
 
-fun FragmentActivity.requestLocationPermission(block: (permission: Permission) -> Unit) = RxPermissions(this)
+
+fun FragmentActivity.requestLocationPermission(block: (permission: Permission) -> Unit): () -> Unit {
+    val mutableList = mutableListOf<Disposable?>()
+    mutableList.add(
+        requestForegroundLocationPermission {
+            if(!it.granted){
+                // user did not grant this permission
+                block(it)
+                return@requestForegroundLocationPermission
+            }
+            // now requesting background permission
+            mutableList.add(
+                requestBackgroundLocationPermission(block)
+            )
+        }
+    )
+
+    // lambda to close all disposables
+    val cancelDisposable: () -> Unit = {
+        mutableList.forEach {
+            it?.run {
+                dispose()
+            }
+        }
+    }
+    return cancelDisposable
+}
+
+
+
+fun FragmentActivity.requestForegroundLocationPermission(block: (permission: Permission) -> Unit): Disposable? = RxPermissions(this)
     .requestEachCombined(
         Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
+        Manifest.permission.ACCESS_FINE_LOCATION,
+
     )
     .subscribe({
         block(it)
     }, {
         Log.v("LocationPermission", "location permission $it")
     })
+
+fun FragmentActivity.requestBackgroundLocationPermission(block: (permission: Permission) -> Unit): Disposable? = RxPermissions(this)
+    .requestEachCombined(
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+
+        )
+    .subscribe({
+        block(it)
+    }, {
+        Log.v("LocationPermission", "location permission $it")
+    })
+
+
+internal fun FragmentActivity.showTwoButtonDialog(rationalMessage: String, block: (Boolean) -> Unit){
+    StartGameDialogFragment(rationalMessage, block).show(supportFragmentManager,"twoButtonDialog")
+}
+
+class StartGameDialogFragment(val rationalMessage: String, val block: (Boolean) -> Unit = { }) : DialogFragment() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return activity?.let {
+            // Use the Builder class for convenient dialog construction
+            val builder = AlertDialog.Builder(it)
+            builder.setMessage(rationalMessage)
+                .setPositiveButton(
+                    com.sprotte.geolocator.R.string.button_allow
+                ) { _, _ ->
+                    block(true)
+                }
+                .setNegativeButton(
+                    com.sprotte.geolocator.R.string.button_reject
+                ) { _, _ ->
+                    block(false)
+                }
+            // Create the AlertDialog object and return it
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
+    }
+}

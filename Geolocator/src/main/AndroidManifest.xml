@@ -3,6 +3,10 @@
     package="com.sprotte.geolocator">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!--Required in API 33/Android 13 onwards -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!--Required in API 30/Android 11 onwards-->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application>
 

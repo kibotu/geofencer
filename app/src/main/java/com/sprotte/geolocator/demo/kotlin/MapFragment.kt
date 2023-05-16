@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.core.content.getSystemService
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -27,6 +29,7 @@ import com.sprotte.geolocator.demo.misc.*
 import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.tracking.LocationTracker
+import com.tbruyelle.rxpermissions2.Permission
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -39,6 +42,77 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
     private var geofence = Geofence()
 
+    @SuppressLint("MissingPermission")
+    val permissionGivenLambda: (Permission) -> Unit = {
+        LocationTracker.removeLocationUpdates(requireContext())
+        LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+        map?.isMyLocationEnabled = it.granted
+        if(it.granted)
+            binding?.run {
+                newReminder.isVisible = true
+                currentLocation.isVisible = true
+            }
+
+        val location = getLastKnownLocation()
+        if (location != null) {
+            val latLng = LatLng(location.latitude, location.longitude)
+            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+        }
+        showGeofences()
+    }
+
+    val permissionRationaleLambda: (Permission)-> Unit = {
+        Timber.d("shouldShowRequestPermissionRationale :" +
+                "${it.shouldShowRequestPermissionRationale} \n for ${it.name}")
+        (activity as FragmentActivity).showTwoButtonDialog(getString(R.string.dialog_rationale_coarse_location)) {
+            if (it) {
+                // ask for permission again
+                Timber.d("ask for permission again")
+                requestLocationPermissionLambda()
+            } else {
+                // permission for denied
+                Timber.d("permission was denied")
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    val requestLocationPermissionLambda: ()->Unit = {
+        val corePermissionFlow: (Permission)-> Unit = {
+            LocationTracker.removeLocationUpdates(requireContext())
+            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+            map?.isMyLocationEnabled = it.granted
+            when {
+                it.granted -> permissionGivenLambda(it)
+                it.shouldShowRequestPermissionRationale -> permissionRationaleLambda(it)
+                else -> {
+                    // goto settings
+                    Timber.d("goto settings for ${it.name}")
+                }
+            }
+        }
+
+        val belowAndroid11Flow: ()-> Unit = {
+            Timber.d("belowAndroid11Flow")
+            requireActivity().requestForegroundLocationPermission {
+                corePermissionFlow(it)
+            }
+        }
+
+        val android11AndAboveFlow:()->Unit = {
+            Timber.d("android11AndAboveFlow")
+            requireActivity().requestLocationPermission {
+                corePermissionFlow(it)
+            }
+
+        }
+
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
+            belowAndroid11Flow()
+        } else android11AndAboveFlow()
+
+    }
+
     private val preferenceChangedListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
 
@@ -47,43 +121,27 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
                 // retrieve location from preferences
                 val locationResult = sharedPreferences.getString(key, null)
-
-                // retrieve location data:
-                // val lastLocation = locationResult.lastLocation
-                // val locations = locationResult.locations
-                // locations.forEach {
-                //     it.latitude
-                //     it.longitude
-                //     it.altitude
-                //     it.speed
-                //     it.bearing
-                // }
-
-                // lastLocation.latitude
-                // lastLocation.longitude
-                // lastLocation.altitude
-                // lastLocation.speed
-                // lastLocation.bearing
-
                 Timber.v("OnSharedPreferenceChange 1 $locationResult")
             }
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = FragmentMapBinding.inflate(inflater, container, false).also {
-        binding = it
-    }.root
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?): View = FragmentMapBinding.
+                inflate(
+                        inflater,
+                        container,
+                        false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding?.setup()
-
         requireContext().getSharedPrefs().registerOnSharedPreferenceChangeListener(preferenceChangedListener)
     }
 
     @SuppressLint("MissingPermission")
     private fun FragmentMapBinding.setup() {
-
         newReminder.isGone = true
         currentLocation.isGone = true
 
@@ -107,26 +165,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
         mapFragment.getMapAsync { map ->
             this@MapFragment.map = map
-            requireActivity().requestLocationPermission {
-
-                LocationTracker.removeLocationUpdates(requireContext())
-                LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
-
-
-                map.isMyLocationEnabled = it.granted
-
-                if (it.granted) {
-                    newReminder.isVisible = true
-                    currentLocation.isVisible = true
-                    @SuppressLint("MissingPermission")
-                    val location = getLastKnownLocation()
-                    if (location != null) {
-                        val latLng = LatLng(location.latitude, location.longitude)
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-                    }
-                    showGeofences()
-                }
-            }
+            requestLocationPermissionLambda()
             map.onMapReady()
         }
     }
@@ -140,6 +179,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     private fun GoogleMap.onMapReady() {
         uiSettings.isMyLocationButtonEnabled = false
         uiSettings.isMapToolbarEnabled = false
+        uiSettings.isZoomControlsEnabled = true
         setOnMarkerClickListener(this@MapFragment)
     }
 

@@ -1,0 +1,40 @@
+name: Android CI Build
+
+on:
+  pull_request:
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+#        TODO
+#      - name: Run Spotless
+#        run:
+
+#        TODO
+#      - name: Run Lint
+#        run: ./gradlew app:lintDebug --stacktrace
+
+      - name: Build
+        run: ./gradlew app:assembleDebug
+
+

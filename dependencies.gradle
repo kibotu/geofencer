@@ -3,9 +3,9 @@ ext {
 
     minSdkVer = 16
 
-    compileSdkVer = 32
-    buildToolsVer = "32.0.0"
-    targetSdkVer = 32
+    compileSdkVer = 33
+    buildToolsVer = "33.0.0"
+    targetSdkVer = 33
 
     // @see https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-jdk8
     kotlinVersion = "1.6.20"

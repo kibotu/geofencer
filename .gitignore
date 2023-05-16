@@ -1,5 +1,6 @@
 # Created by https://www.gitignore.io/api/android,jetbrains,linux,macos,windows
 
+*.patch
 ### Android ###
 # Built application files
 *.apk

@@ -43,12 +43,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         log("unknow geofencing error" + geofencingEvent.triggeringGeofences[0].requestId)
         val geofence = repo.get(geofencingEvent.triggeringGeofences[0].requestId) ?: return
 
-        //                    val i = Intent(context, Class.forName(geofence.intentClassName))
-        //                    i.putExtra(Geofencer.INTENT_EXTRAS_KEY, geofence.id)
-        //                    context.startService(i)
-        //                    val clasz =Class.forName(geofence.intentClassName) as GeofenceIntentService
-        ////                    JobIntentService.enqueueWork(context, clasz, 12345, i)
-
         log("geofence enqeue work geofence=$geofence")
         JobIntentService.enqueueWork(
             context,
