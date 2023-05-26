@@ -17,10 +17,11 @@ Convenience library to receive user location updates and geofence events with mi
      
 ### Requirements
 
-1. Location permissions in [*AndroidManifest.xml*](app/src/main/AndroidManifest.xml#L8-L9)
+1. Location permissions in [*AndroidManifest.xml*](app/src/main/AndroidManifest.xml#L5-L9)
 
 	    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    	 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+   	 	<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
    	 	
 2. Google maps api key
 
@@ -33,7 +34,7 @@ Convenience library to receive user location updates and geofence events with mi
 1. Create [Receiver](app/src/main/kotlin/com/sprotte/geolocator/demo/kotlin/NotificationWorker.kt)
 
 ```kotlin
-class NotificationWorker : CoreWorkerModule() {
+class NotificationWorker : GeoFenceUpdateModule() {
 	
     override fun onGeofence(geofence: Geofence) {
     	Timber.v(, "onGeofence $geofence")
@@ -41,7 +42,7 @@ class NotificationWorker : CoreWorkerModule() {
 }
 ```
 
-2. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L33-L46)
+2. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L30-L39)
 
 ```kotlin
 val geofence = Geofence(
@@ -58,26 +59,21 @@ Geofencer(this).addGeofenceWorker(geofence, NotificationWorker::class.java) { /*
 ```
 ### Location Tracker
 TODO: replace with worker
-1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/kotlin/LocationTrackerService.kt)
+1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/kotlin/LocationTrackerWorker.kt)
 
 ```kotlin
-class LocationTrackerService : LocationTrackerUpdateIntentService() {
+class LocationTrackerWorker : LocationTrackerUpdateModule() {
 
 	override fun onLocationResult(locationResult: LocationResult) {  
 		Log.v(GeoFenceIntentService::class.java.simpleName, "onLocationResult $location")
   }
 }
 ```
-2. Add receiver to [manifest](app/src/main/AndroidManifest.xml#L49-L51)
 
-		<service
-            android:name=".kotlin.LocationTrackerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-3. [Start tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L48-L51)
+2. [Start tracking](app/src/main/java/com/sprotte/geolocator/demo/kotlin/MainActivity.kt#L44-L45)
 
 ```kotlin
-LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
+LocationTracker.requestLocationUpdates(this, LocationTrackerWorker::class.java)
 ```
 
 4. Stop tracking
@@ -93,7 +89,7 @@ LocationTracker.removeLocationUpdates(requireContext())
 1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/NotificationWorker.java)
 
 ```java
-public class NotificationWorker extends CoreWorkerModule {
+public class NotificationWorker extends GeoFenceUpdateModule {
 	
 	@Override
 	public void onGeofence(@NotNull Geofence geofence) {
@@ -102,7 +98,7 @@ public class NotificationWorker extends CoreWorkerModule {
 }
 ```
 
-2. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L48-L63)
+2. [Start geofence tracking](app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L47-L56)
 
 ```java
 Geofence geofence = new Geofence(
@@ -121,10 +117,10 @@ geofencer.addGeofenceWorker(geofence, NotificationWorker.class,
 
 TODO: replace with worker
 
-1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/LocationTrackerService.java)
+1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/LocationTrackerWorker.java)
 
 ```java
-public class LocationTrackerService extends LocationTrackerUpdateIntentService {
+public class LocationTrackerWorker extends LocationTrackerUpdateModule {
 
     @Override
     public void onLocationResult(@NotNull LocationResult location) {
@@ -132,18 +128,12 @@ public class LocationTrackerService extends LocationTrackerUpdateIntentService {
         Log.v(GeoFenceIntentService.class.getSimpleName(), "onLocationResult " + location);		        );
     }
 }
-```	
+```
 
-2. Add receiver to [manifest](app/src/main/AndroidManifest.xml#L66-L68)
-
-		<service
-            android:name=".java.LocationTrackerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-3. [Start tracking](https://github.com/exozet/Geolocator/blob/master/app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L65-L68)
+2. [Start tracking](https://github.com/exozet/Geolocator/blob/master/app/src/main/java/com/sprotte/geolocator/demo/java/AddGeoFenceActivity.java#L65-L68)
 
 ```java
-LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
+LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerWorker.class);
 ```
 
 4. Stop tracking

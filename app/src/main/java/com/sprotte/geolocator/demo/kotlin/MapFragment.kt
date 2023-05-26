@@ -47,7 +47,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     @SuppressLint("MissingPermission")
     val permissionGivenLambda: (Permission) -> Unit = {
         LocationTracker.removeLocationUpdates(requireContext())
-        LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+        LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerWorker::class.java)
         map?.isMyLocationEnabled = it.granted
         if(it.granted)
             binding?.run {
@@ -82,7 +82,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     val requestLocationPermissionLambda: ()->Unit = {
         val corePermissionFlow: (Permission)-> Unit = {
             LocationTracker.removeLocationUpdates(requireContext())
-            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerWorker::class.java)
             map?.isMyLocationEnabled = it.granted
             when {
                 it.granted -> permissionGivenLambda(it)
@@ -150,7 +150,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
 
             // key has been updated
-            if (key == LocationTrackerService.PREFERENCE_LOCATION) {
+            if (key == LocationTrackerWorker.PREFERENCE_LOCATION) {
 
                 // retrieve location from preferences
                 val locationResult = sharedPreferences.getString(key, null)

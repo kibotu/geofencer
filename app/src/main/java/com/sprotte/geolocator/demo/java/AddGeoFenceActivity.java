@@ -59,7 +59,7 @@ public class AddGeoFenceActivity extends AppCompatActivity {
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private void registerLocationUpdateEvents() {
-        LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
+        LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerWorker.class);
     }
 
     @Override

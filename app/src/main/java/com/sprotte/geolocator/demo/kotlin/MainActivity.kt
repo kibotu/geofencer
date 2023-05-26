@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresPermission(permission.ACCESS_FINE_LOCATION)
     private fun registerLocationUpdateEvents() {
-        LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
+        LocationTracker.requestLocationUpdates(this, LocationTrackerWorker::class.java)
     }
 
     override fun onSupportNavigateUp() = Navigation.findNavController(this, R.id.navHost).navigateUp() || super.onSupportNavigateUp()

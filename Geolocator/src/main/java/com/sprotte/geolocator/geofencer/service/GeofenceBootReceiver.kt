@@ -3,6 +3,7 @@ package com.sprotte.geolocator.geofencer.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.sprotte.geolocator.utils.enqueueOneTimeBootWorkRequest
 import com.sprotte.geolocator.utils.log
 
 class GeofenceBootReceiver : BroadcastReceiver() {
@@ -22,10 +23,7 @@ class GeofenceBootReceiver : BroadcastReceiver() {
 
     private fun enqueueWork(context: Context?, intent: Intent) {
         context?.run {
-            GeofenceBootService.enqueueWork(
-                this,
-                intent
-            )
+            enqueueOneTimeBootWorkRequest(this)
         }
     }
 }
