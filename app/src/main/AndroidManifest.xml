@@ -49,11 +49,18 @@
             android:name=".kotlin.GeofenceIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+
+        <!--Below Worker will be invoked from library-->
+        <service android:name=".kotlin.GeoFenceWorker" android:exported="false">
+            <intent-filter>
+                <action android:name="com.sprotte.geolocator.worker.WORKER_MODULE_INTENT" />
+            </intent-filter>
+        </service>
+
         <service
             android:exported="false"
             android:name=".kotlin.LocationTrackerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-
         <!-- java version -->
 
         <activity

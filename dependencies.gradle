@@ -33,7 +33,7 @@ ext.plugin = [
 ]
 ext.libs = [
         gson                     : "com.google.code.gson:gson:2.9.0",
-        playServicesLocation     : "com.google.android.gms:play-services-location:19.0.1",
+        playServicesLocation     : "com.google.android.gms:play-services-location:21.0.1",
         coreKtx                  : "androidx.core:core-ktx:1.7.0",
         preferenceKtx            : "androidx.preference:preference-ktx:1.2.0",
         appcompat                : "androidx.appcompat:appcompat:1.4.1",
@@ -50,5 +50,6 @@ ext.libs = [
         playServicesMaps         : "com.google.android.gms:play-services-maps:18.0.2",
         rx2java                  : "io.reactivex.rxjava2:rxjava:2.2.21",
         rx2Android               : "io.reactivex.rxjava2:rxandroid:2.1.1",
-        rx2Kotlin                : "io.reactivex.rxjava2:rxkotlin:2.4.0"
+        rx2Kotlin                : "io.reactivex.rxjava2:rxkotlin:2.4.0",
+        workManagerKtx           : "androidx.work:work-runtime-ktx:2.7.1",
 ]

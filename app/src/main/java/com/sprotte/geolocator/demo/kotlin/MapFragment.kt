@@ -119,12 +119,14 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if(isGranted) {
-                // PN is not granted, now ask for location permission
+                // PN permission is granted, now ask for location permission
                 requestLocationPermissionLambda()
                 return@registerForActivityResult
             }
             if(shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS) ){
+                // PN is not granted
                 if(!hasShownPNRational)  {
+                    // PN rationale dialog was not shown
                     hasShownPNRational = true
                     askForPNRationale()
                 } else {
@@ -198,6 +200,12 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
         mapFragment.getMapAsync { map ->
             this@MapFragment.map = map
+            /**
+             * start asking all permissions
+             * 1. Notification
+             * 2. FINE AND COARSE Location
+             * 3. Background Location
+             * */
             notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             map.onMapReady()
         }

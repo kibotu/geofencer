@@ -16,9 +16,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sprotte.geolocator.BuildConfig
+import com.sprotte.geolocator.geofencer.Geofencer
+import com.sprotte.geolocator.geofencer.service.GeoFenceWorker
 
 internal val debug = BuildConfig.DEBUG
 
@@ -106,4 +111,15 @@ class StartGameDialogFragment(val rationalMessage: String, val block: (Boolean) 
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
+}
+
+fun enqueueOneTimeWorkRequest(ctx: Context, geoFenceId: String) {
+    val inputData: Data = Data.Builder()
+        .putString(Geofencer.INTENT_EXTRAS_KEY, geoFenceId)
+        .build()
+    val ontTimeWorkRequest = OneTimeWorkRequestBuilder<GeoFenceWorker>()
+        .setInputData(inputData)
+        .addTag(GeoFenceWorker::class.simpleName.toString())
+        .build()
+    WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
 }

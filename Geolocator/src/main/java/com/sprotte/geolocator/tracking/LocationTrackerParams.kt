@@ -1,7 +1,7 @@
 package com.sprotte.geolocator.tracking
 
 import android.content.Context
-import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.Priority
 import com.sprotte.geolocator.R
 import com.sprotte.geolocator.utils.getRes
 
@@ -44,7 +44,7 @@ open class LocationTrackerParams {
     constructor(context: Context) {
         this.interval = context.getRes(R.integer.location_update_interval_in_millis)
         this.fastestInterval = context.getRes(R.integer.location_fastest_update_interval_in_millis)
-        this.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        this.priority = Priority.PRIORITY_HIGH_ACCURACY
         this.maxWaitTime = context.getRes(R.integer.location_max_wait_time_interval_in_millis)
         this.smallestDisplacement =
             context.getRes(R.integer.location_min_distance_for_updates_in_meters).toFloat()

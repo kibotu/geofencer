@@ -21,10 +21,11 @@ class GeofenceBootReceiver : BroadcastReceiver() {
     }
 
     private fun enqueueWork(context: Context?, intent: Intent) {
-        GeofenceBootService.enqueueWork(
-            context!!,
-            intent
-        )
+        context?.run {
+            GeofenceBootService.enqueueWork(
+                this,
+                intent
+            )
+        }
     }
-
 }
