@@ -52,14 +52,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         log("geofence enqeue work geofence=$geofence")
         log("geofence enqeue work geofence=$geofence intentClassName=${geofence.intentClassName}")
-
         enqueueOneTimeWorkRequest(context, geofence.id)
-//        JobIntentService.enqueueWork(
-//            context,
-//            Class.forName(geofence.intentClassName),
-//            12345,
-//            Intent().apply {
-//                putExtra(Geofencer.INTENT_EXTRAS_KEY, geofence.id)
-//            })
     }
 }

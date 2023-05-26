@@ -229,7 +229,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         requireActivity().requestLocationPermission {
             if (it.granted) {
                 Geofencer(requireContext())
-                    .addGeofence(geofence, GeofenceIntentService::class.java) {
+                    .addGeofenceWorker(geofence, NotificationWorker::class.java){
                         binding?.container?.isGone = true
                         showGeofences()
                     }

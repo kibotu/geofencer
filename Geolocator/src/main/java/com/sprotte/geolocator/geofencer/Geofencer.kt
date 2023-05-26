@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
 import androidx.core.app.JobIntentService
+import com.sprotte.geolocator.geofencer.models.CoreWorkerModule
 import com.sprotte.geolocator.geofencer.models.Geofence
 
 class Geofencer(context: Context) {
@@ -27,9 +28,8 @@ class Geofencer(context: Context) {
 
     var repository = GeofenceRepository(context)
 
-    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    fun <T : JobIntentService> addGeofence(geofence: Geofence, intent: Class<T>, success: (() -> Unit)? = null) {
-        geofence.intentClassName = intent.canonicalName!!
+    fun <T : CoreWorkerModule> addGeofenceWorker(geofence: Geofence, intent: Class<T>, success: (() -> Unit)? = null) {
+        geofence.intentClassName = intent.canonicalName ?: ""
         repository.add(geofence) {
             success?.invoke()
         }

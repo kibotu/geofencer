@@ -53,8 +53,7 @@ public class AddGeoFenceActivity extends AppCompatActivity {
                 "Entered Germany",
                 GEOFENCE_TRANSITION_ENTER);
         Geofencer geofencer = new Geofencer(this);
-        geofencer.addGeofence(geofence, GeofenceIntentService.class,
-                () -> /* successfully added geofence */ Unit.INSTANCE);
+        geofencer.addGeofenceWorker(geofence, NotificationWorker.class, ()-> Unit.INSTANCE);
 
     }
 

@@ -36,8 +36,7 @@ class MainActivity : AppCompatActivity() {
             message = "Entered Germany",
             transitionType = com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER
         )
-
-        Geofencer(this).addGeofence(geofence, GeofenceIntentService::class.java) { /* successfully added geofence */ }
+        Geofencer(this).addGeofenceWorker(geofence, NotificationWorker::class.java) { /* successfully added geofence */ }
     }
 
     @RequiresPermission(permission.ACCESS_FINE_LOCATION)
