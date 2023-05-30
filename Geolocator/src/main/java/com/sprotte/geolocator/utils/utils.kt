@@ -5,12 +5,17 @@
 
 package com.sprotte.geolocator.utils
 
+import android.app.Dialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Bundle
 import androidx.preference.PreferenceManager
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sprotte.geolocator.BuildConfig
@@ -75,4 +80,30 @@ internal fun Context.getSharedPrefs(): SharedPreferences{
 
 internal fun Context.getRes(resInt: Int): Long{
     return applicationContext.resources.getInteger(resInt).toLong()
+}
+
+fun FragmentActivity.showTwoButtonDialog(rationalMessage: String, block: (Boolean) -> Unit){
+    StartGameDialogFragment(rationalMessage, block).show(supportFragmentManager,"twoButtonDialog")
+}
+
+class StartGameDialogFragment(val rationalMessage: String, val block: (Boolean) -> Unit = { }) : DialogFragment() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return activity?.let {
+            // Use the Builder class for convenient dialog construction
+            val builder = AlertDialog.Builder(it)
+            builder.setMessage(rationalMessage)
+                .setPositiveButton(
+                    com.sprotte.geolocator.R.string.button_allow
+                ) { _, _ ->
+                    block(true)
+                }
+                .setNegativeButton(
+                    com.sprotte.geolocator.R.string.button_reject
+                ) { _, _ ->
+                    block(false)
+                }
+            // Create the AlertDialog object and return it
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
+    }
 }

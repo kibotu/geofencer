@@ -4,4 +4,7 @@
         <item quantity="one">One location reported</item>
         <item quantity="other">%d locations reported</item>
     </plurals>
+    <string name="dialog_rationale_coarse_location">We need GPS Location in background so that we can guide you when you are at that locations</string>
+    <string name="button_allow">Allow</string>
+    <string name="button_reject">Reject</string>
 </resources>
