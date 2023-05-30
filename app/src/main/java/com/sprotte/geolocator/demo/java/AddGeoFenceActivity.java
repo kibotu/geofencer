@@ -53,14 +53,13 @@ public class AddGeoFenceActivity extends AppCompatActivity {
                 "Entered Germany",
                 GEOFENCE_TRANSITION_ENTER);
         Geofencer geofencer = new Geofencer(this);
-        geofencer.addGeofence(geofence, GeofenceIntentService.class,
-                () -> /* successfully added geofence */ Unit.INSTANCE);
+        geofencer.addGeofenceWorker(geofence, NotificationWorker.class, ()-> Unit.INSTANCE);
 
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private void registerLocationUpdateEvents() {
-        LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class);
+        LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerWorker.class);
     }
 
     @Override

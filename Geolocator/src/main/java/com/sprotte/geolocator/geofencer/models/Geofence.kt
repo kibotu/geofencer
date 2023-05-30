@@ -37,7 +37,7 @@ data class Geofence(
     var transitionType: Int = 1
 ) {
     /**
-     * Event Receiver. Needs to be [com.sprotte.geolocator.geofencer.service.GeofenceIntentService]
+     * Event Receiver. Needs to be [com.sprotte.geolocator.geofencer.models.CoreWorkerModule]
      */
     var intentClassName: String = ""
 }

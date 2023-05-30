@@ -29,15 +29,6 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name="com.sprotte.geolocator.geofencer.service.GeofenceBootService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:name="com.sprotte.geolocator.tracking.service.LocationTrackerUpdateIntentService"
-            android:exported="false" />
-
         <receiver
             android:name="com.sprotte.geolocator.tracking.service.LocationTrackerUpdateBroadcastReceiver"
             android:exported="false">

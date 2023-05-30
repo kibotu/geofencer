@@ -7,6 +7,7 @@ package com.sprotte.geolocator.utils
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
@@ -16,9 +17,16 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sprotte.geolocator.BuildConfig
+import com.sprotte.geolocator.geofencer.Geofencer
+import com.sprotte.geolocator.geofencer.service.GeoFenceUpdateWorker
+import com.sprotte.geolocator.geofencer.service.GeofenceBootWorker
+import com.sprotte.geolocator.tracking.service.LocationTrackerUpdateWorker
 
 internal val debug = BuildConfig.DEBUG
 
@@ -106,4 +114,35 @@ class StartGameDialogFragment(val rationalMessage: String, val block: (Boolean) 
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
+}
+
+fun enqueueOneTimeWorkRequest(ctx: Context, geoFenceId: String) {
+    val inputData: Data = Data.Builder()
+        .putString(Geofencer.INTENT_EXTRAS_KEY, geoFenceId)
+        .build()
+    val ontTimeWorkRequest = OneTimeWorkRequestBuilder<GeoFenceUpdateWorker>()
+        .setInputData(inputData)
+        .addTag(GeoFenceUpdateWorker::class.simpleName.toString())
+        .build()
+    WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
+}
+
+fun enqueueOneTimeBootWorkRequest(ctx: Context) {
+    val ontTimeWorkRequest = OneTimeWorkRequestBuilder<GeofenceBootWorker>()
+        .addTag(GeoFenceUpdateWorker::class.simpleName.toString())
+        .build()
+    WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
+}
+
+fun enqueueOneTimeLocationUpdateWorkRequest(ctx: Context, componentName: String, intent: Intent) {
+    val inputData: Data = Data.Builder()
+        .putString(Geofencer.LOCATION_UPDATE_CLASS_NAME, componentName)
+        .putString(Geofencer.LOCATION_UPDATE_CLASS_NAME, Gson().toJson(intent))
+        .build()
+
+    val ontTimeWorkRequest = OneTimeWorkRequestBuilder<LocationTrackerUpdateWorker>()
+        .setInputData(inputData)
+        .addTag(GeoFenceUpdateWorker::class.simpleName.toString())
+        .build()
+    WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
 }

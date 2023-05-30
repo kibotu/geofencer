@@ -47,7 +47,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     @SuppressLint("MissingPermission")
     val permissionGivenLambda: (Permission) -> Unit = {
         LocationTracker.removeLocationUpdates(requireContext())
-        LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+        LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerWorker::class.java)
         map?.isMyLocationEnabled = it.granted
         if(it.granted)
             binding?.run {
@@ -82,7 +82,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     val requestLocationPermissionLambda: ()->Unit = {
         val corePermissionFlow: (Permission)-> Unit = {
             LocationTracker.removeLocationUpdates(requireContext())
-            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerService::class.java)
+            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerWorker::class.java)
             map?.isMyLocationEnabled = it.granted
             when {
                 it.granted -> permissionGivenLambda(it)
@@ -119,12 +119,14 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if(isGranted) {
-                // PN is not granted, now ask for location permission
+                // PN permission is granted, now ask for location permission
                 requestLocationPermissionLambda()
                 return@registerForActivityResult
             }
             if(shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS) ){
+                // PN is not granted
                 if(!hasShownPNRational)  {
+                    // PN rationale dialog was not shown
                     hasShownPNRational = true
                     askForPNRationale()
                 } else {
@@ -148,7 +150,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
 
             // key has been updated
-            if (key == LocationTrackerService.PREFERENCE_LOCATION) {
+            if (key == LocationTrackerWorker.PREFERENCE_LOCATION) {
 
                 // retrieve location from preferences
                 val locationResult = sharedPreferences.getString(key, null)
@@ -198,6 +200,12 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
         mapFragment.getMapAsync { map ->
             this@MapFragment.map = map
+            /**
+             * start asking all permissions
+             * 1. Notification
+             * 2. FINE AND COARSE Location
+             * 3. Background Location
+             * */
             notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             map.onMapReady()
         }
@@ -221,7 +229,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         requireActivity().requestLocationPermission {
             if (it.granted) {
                 Geofencer(requireContext())
-                    .addGeofence(geofence, GeofenceIntentService::class.java) {
+                    .addGeofenceWorker(geofence, NotificationWorker::class.java){
                         binding?.container?.isGone = true
                         showGeofences()
                     }

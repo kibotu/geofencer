@@ -36,13 +36,12 @@ class MainActivity : AppCompatActivity() {
             message = "Entered Germany",
             transitionType = com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER
         )
-
-        Geofencer(this).addGeofence(geofence, GeofenceIntentService::class.java) { /* successfully added geofence */ }
+        Geofencer(this).addGeofenceWorker(geofence, NotificationWorker::class.java) { /* successfully added geofence */ }
     }
 
     @RequiresPermission(permission.ACCESS_FINE_LOCATION)
     private fun registerLocationUpdateEvents() {
-        LocationTracker.requestLocationUpdates(this, LocationTrackerService::class.java)
+        LocationTracker.requestLocationUpdates(this, LocationTrackerWorker::class.java)
     }
 
     override fun onSupportNavigateUp() = Navigation.findNavController(this, R.id.navHost).navigateUp() || super.onSupportNavigateUp()

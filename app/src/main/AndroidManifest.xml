@@ -44,15 +44,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:exported="false"
-            android:name=".kotlin.GeofenceIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:exported="false"
-            android:name=".kotlin.LocationTrackerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <!-- java version -->
 
@@ -64,16 +55,6 @@
             <nav-graph android:value="@navigation/navigation_controller" />
 
         </activity>
-
-        <service
-            android:exported="false"
-            android:name=".java.GeofenceIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:exported="false"
-            android:name=".java.LocationTrackerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>
 

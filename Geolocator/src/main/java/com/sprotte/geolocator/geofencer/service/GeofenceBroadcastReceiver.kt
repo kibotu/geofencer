@@ -8,6 +8,7 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.sprotte.geolocator.geofencer.GeofenceRepository
 import com.sprotte.geolocator.geofencer.Geofencer
+import com.sprotte.geolocator.utils.enqueueOneTimeWorkRequest
 import com.sprotte.geolocator.utils.log
 
 
@@ -23,7 +24,12 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             return
         }
 
-        val geofencingEvent = GeofencingEvent.fromIntent(intent)
+        var geofencingEvent : GeofencingEvent? = GeofencingEvent.fromIntent(intent)
+
+        if(geofencingEvent == null){
+            return
+        }
+
         if (geofencingEvent.hasError()) {
             log("geofencing errorCode: $geofencingEvent.errorCode")
             return
@@ -35,21 +41,17 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             log("unknow geofencing error")
             return
         }
-        log("unknow geofencing error" + geofencingEvent.triggeringGeofences.size)
-        if (geofencingEvent.triggeringGeofences.size <= 0) return
+        log("unknow geofencing error" + geofencingEvent.triggeringGeofences?.size)
+        if ((geofencingEvent.triggeringGeofences?.size ?: 0) <= 0) return
         val repo = GeofenceRepository(context)
+
         log("unknow geofencing error" + repo.getAll().count())
-        log("unknow geofencing error" + repo.getAll().first().id)
-        log("unknow geofencing error" + geofencingEvent.triggeringGeofences[0].requestId)
-        val geofence = repo.get(geofencingEvent.triggeringGeofences[0].requestId) ?: return
+        log("unknow geofencing error" + repo.getAll().firstOrNull()?.id)
+        log("unknow geofencing error" + geofencingEvent.triggeringGeofences?.get(0)?.requestId)
+        val geofence = repo.get(geofencingEvent.triggeringGeofences?.get(0)?.requestId) ?: return
 
         log("geofence enqeue work geofence=$geofence")
-        JobIntentService.enqueueWork(
-            context,
-            Class.forName(geofence.intentClassName),
-            12345,
-            Intent().apply {
-                putExtra(Geofencer.INTENT_EXTRAS_KEY, geofence.id)
-            })
+        log("geofence enqeue work geofence=$geofence intentClassName=${geofence.intentClassName}")
+        enqueueOneTimeWorkRequest(context, geofence.id)
     }
 }

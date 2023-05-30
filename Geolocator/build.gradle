@@ -72,6 +72,7 @@ dependencies {
     implementation libs.playServicesLocation
     implementation libs.coreKtx
     implementation libs.preferenceKtx
+    implementation libs.workManagerKtx
 }
 
 configurations.all {
