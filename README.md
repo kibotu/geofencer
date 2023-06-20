@@ -115,8 +115,6 @@ geofencer.addGeofenceWorker(geofence, NotificationWorker.class,
 ```
 ### Location Tracker
 
-TODO: replace with worker
-
 1. Create [Receiver](app/src/main/java/com/sprotte/geolocator/demo/java/LocationTrackerWorker.java)
 
 ```java
@@ -211,3 +209,5 @@ You can also set this values at runtime in some step before call method `request
 [Paul Sprotte](paul.sprotte@exozet.com)
 
 [AgnaldoNP] (https://github.com/AgnaldoNP)
+
+[Mohammed Khalid Hamid](https://github.com/khalid64927)
