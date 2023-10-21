@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="zero_dp">0dp</dimen>
+    <dimen name="two_dp">2dp</dimen>
+    <dimen name="four_dp">4dp</dimen>
+    <dimen name="eight_dp">8dp</dimen>
+    <dimen name="thirteen_dp">13dp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="forty_eight_dp">48dp</dimen>
+
+    <!--text size-->
+    <dimen name="two_sp">2sp</dimen>
+    <dimen name="fourteen_sp">14sp</dimen>
+    <dimen name="sixteen_sp">16sp</dimen>
+    <dimen name="eighteen_sp">18sp</dimen>
+    <dimen name="twenty_sp">20sp</dimen>
 
 </resources>
