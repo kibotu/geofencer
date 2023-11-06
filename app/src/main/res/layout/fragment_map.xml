@@ -10,9 +10,9 @@
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:padding="@dimen/activity_horizontal_margin"
+        android:layout_width="@dimens/zero_dp"
+        android:layout_height="@dimens/zero_dp"
+        android:padding="@dimens/activity_horizontal_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimens/activity_horizontal_margin"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,14 +32,14 @@
             android:id="@+id/currentLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_margin="@dimens/activity_horizontal_margin"
             app:srcCompat="@drawable/ic_baseline_my_location_24px" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/newReminder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_margin="@dimens/activity_horizontal_margin"
             app:srcCompat="@drawable/ic_baseline_add_24px" />
     </LinearLayout>
 
@@ -56,8 +56,8 @@
 
         <ImageView
             android:id="@+id/marker"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimens/forty_eight_dp"
+            android:layout_height="@dimens/forty_eight_dp"
             android:layout_centerInParent="true"
             android:contentDescription="@string/marker_content_description"
             app:srcCompat="@drawable/ic_twotone_location_on_48px" />
@@ -74,21 +74,21 @@
                 android:id="@+id/instructionTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="@dimens/activity_horizontal_margin"
+                android:layout_marginTop="@dimens/activity_horizontal_margin"
+                android:layout_marginRight="@dimens/activity_horizontal_margin"
+                android:layout_marginBottom="@dimens/eight_dp"
                 android:textColor="#000"
-                android:textSize="18sp"
+                android:textSize="@dimens/eighteen_sp"
                 tools:text="@string/instruction_where_description" />
 
             <TextView
                 android:id="@+id/instructionSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="@dimens/activity_horizontal_margin"
+                android:layout_marginRight="@dimens/activity_horizontal_margin"
+                android:layout_marginBottom="@dimens/eight_dp"
                 android:text="@string/instruction_where_subtitle_description" />
 
             <SeekBar
@@ -96,8 +96,8 @@
                 style="@style/Widget.AppCompat.SeekBar.Discrete"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
+                android:layout_marginLeft="@dimens/two_dp"
+                android:layout_marginRight="@dimens/two_dp"
                 android:max="4"
                 android:progress="2" />
 
@@ -106,19 +106,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|bottom"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginBottom="4dp"
+                android:layout_marginLeft="@dimens/activity_horizontal_margin"
+                android:layout_marginTop="@dimens/four_dp"
+                android:layout_marginRight="@dimens/activity_horizontal_margin"
+                android:layout_marginBottom="@dimens/four_dp"
                 tools:text="100 meters" />
 
             <EditText
                 android:id="@+id/message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="13dp"
-                android:layout_marginRight="13dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="@dimens/thirteen_dp"
+                android:layout_marginRight="@dimens/thirteen_dp"
+                android:layout_marginBottom="@dimens/eight_dp"
                 android:hint="@string/message_hint"
                 android:imeOptions="actionDone"
                 android:inputType="textCapSentences"
@@ -129,10 +129,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="@dimens/activity_horizontal_margin"
+                android:layout_marginTop="@dimens/eight_dp"
+                android:layout_marginRight="@dimens/activity_horizontal_margin"
+                android:layout_marginBottom="@dimens/eight_dp"
                 android:background="@drawable/bg_button"
                 android:foreground="?attr/selectableItemBackground"
                 android:text="@string/continue_description"
