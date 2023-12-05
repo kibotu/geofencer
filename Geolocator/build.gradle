@@ -90,7 +90,7 @@ afterEvaluate {
                 from components.release
                 groupId = "com.github.exozet"
                 artifactId = 'Geolocator'
-                version = "2.1.1"
+                version = "2.1.2"
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.sprotte.geolocator.demo.misc
 
 import android.Manifest
-import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,22 +11,23 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
-import android.os.Bundle
-import androidx.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.annotation.DrawableRes
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import androidx.preference.PreferenceManager
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.sprotte.geolocator.demo.BuildConfig
 import com.sprotte.geolocator.demo.R
 import com.sprotte.geolocator.demo.kotlin.MainActivity
@@ -116,7 +116,7 @@ fun sendNotification(context: Context, title: String, message: String) {
         .addParentStack(MainActivity::class.java)
         .addNextIntent(intent)
     val notificationPendingIntent = stackBuilder
-        .getPendingIntent(getUniqueId(),  PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        .getPendingIntent(getUniqueId(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
 
     val notification = NotificationCompat.Builder(context,
         NOTIFICATION_CHANNEL_ID
