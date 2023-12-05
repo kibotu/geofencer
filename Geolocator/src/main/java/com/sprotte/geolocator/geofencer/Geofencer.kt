@@ -1,11 +1,7 @@
 package com.sprotte.geolocator.geofencer
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import androidx.annotation.RequiresPermission
-import androidx.core.app.JobIntentService
-import com.sprotte.geolocator.geofencer.models.CoreWorkerModule
 import com.sprotte.geolocator.geofencer.models.GeoFenceUpdateModule
 import com.sprotte.geolocator.geofencer.models.Geofence
 
@@ -14,7 +10,7 @@ class Geofencer(context: Context) {
     companion object {
 
         fun parseExtras(context: Context, intent: Intent): Geofence? {
-            val id = intent.extras?.getString(Geofencer.INTENT_EXTRAS_KEY)
+            val id = intent.extras?.getString(INTENT_EXTRAS_KEY)
             if (id != null) {
                 return Geofencer(context).get(id)
             }

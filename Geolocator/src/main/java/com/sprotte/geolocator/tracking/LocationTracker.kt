@@ -56,7 +56,8 @@ object LocationTracker {
     private fun getLocationRequest(context: Context, params: LocationTrackerParams = LocationTrackerParams(context)): LocationRequest {
         val builder = LocationRequest.Builder(
             params.priority,
-            params.interval).apply {
+            params.interval
+        ).apply {
             setMinUpdateIntervalMillis(params.fastestInterval)
             setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
             setMaxUpdateDelayMillis(params.maxWaitTime)
@@ -90,10 +91,10 @@ object LocationTracker {
         context.getSharedPrefs().edit().putString(PREFS_NAME, clasz.canonicalName).apply()
         try {
             log("Starting location updates")
-            LocationServices.getFusedLocationProviderClient(context).
-            requestLocationUpdates(
+            LocationServices.getFusedLocationProviderClient(context).requestLocationUpdates(
                 getLocationRequest(context, params),
-                getTrackingPendingIntent(context))
+                getTrackingPendingIntent(context)
+            )
         } catch (e: SecurityException) {
             log(e.message)
         }

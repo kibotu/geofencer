@@ -11,6 +11,8 @@ apply plugin: 'kotlin-android'
 
 android {
 
+    namespace "com.sprotte.geolocator.demo"
+
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
 
@@ -77,8 +79,8 @@ android {
     // region compile options
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     // endregion
@@ -86,7 +88,7 @@ android {
     // region compile options
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     // endregion
@@ -125,6 +127,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 
@@ -161,7 +164,7 @@ dependencies {
     implementation libs.workManagerKtx
 }
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.cacheDynamicVersionsFor 120, 'minutes'
 
     (libs).each {

@@ -1,7 +1,7 @@
 package com.sprotte.geolocator.geofencer.models
 
 import com.sprotte.geolocator.geofencer.TransitionType
-import java.util.*
+import java.util.UUID
 
 data class Geofence(
     /**

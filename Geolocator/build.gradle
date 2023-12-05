@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'maven-publish'
 
 
 android {
+    namespace "com.sprotte.geolocator"
 
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
@@ -30,8 +30,8 @@ android {
     // region java compiler flags
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     // endregion
@@ -39,7 +39,7 @@ android {
     // region compile options
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     // endregion
@@ -75,7 +75,7 @@ dependencies {
     implementation libs.workManagerKtx
 }
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.cacheDynamicVersionsFor 120, 'minutes'
 
     (libs).each {
@@ -90,7 +90,7 @@ afterEvaluate {
                 from components.release
                 groupId = "com.github.exozet"
                 artifactId = 'Geolocator'
-                version = "2.0.0"
+                version = "2.1.0"
             }
         }
     }

@@ -42,6 +42,7 @@ internal fun <T> Context.sharedPreference(key: String, defaultValue: T): ReadWri
             Editor::putBoolean,
             key
         )
+
         is Int -> SharedPreferenceDelegate(
             this,
             defaultValue,
@@ -49,6 +50,7 @@ internal fun <T> Context.sharedPreference(key: String, defaultValue: T): ReadWri
             Editor::putInt,
             key
         )
+
         is Long -> SharedPreferenceDelegate(
             this,
             defaultValue,
@@ -56,6 +58,7 @@ internal fun <T> Context.sharedPreference(key: String, defaultValue: T): ReadWri
             Editor::putLong,
             key
         )
+
         is Float -> SharedPreferenceDelegate(
             this,
             defaultValue,
@@ -63,6 +66,7 @@ internal fun <T> Context.sharedPreference(key: String, defaultValue: T): ReadWri
             Editor::putFloat,
             key
         )
+
         is String -> SharedPreferenceDelegate(
             this,
             defaultValue,
@@ -70,5 +74,6 @@ internal fun <T> Context.sharedPreference(key: String, defaultValue: T): ReadWri
             Editor::putString,
             key
         )
+
         else -> throw IllegalArgumentException()
     } as ReadWriteProperty<Any, T>

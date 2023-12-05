@@ -12,36 +12,33 @@ import com.sprotte.geolocator.R
 import com.sprotte.geolocator.geofencer.models.Geofence
 import com.sprotte.geolocator.geofencer.service.GeofenceBroadcastReceiver
 import com.sprotte.geolocator.utils.*
-import com.sprotte.geolocator.utils.fromJson
-import com.sprotte.geolocator.utils.loge
-import com.sprotte.geolocator.utils.sharedPreference
-import com.sprotte.geolocator.utils.toJson
 
 class GeofenceRepository(private val context: Context) {
 
     private val geofencingClient = LocationServices.getGeofencingClient(context)
 
     private val geofencePendingIntent: PendingIntent
-    get() {
-        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
-        return PendingIntent.getBroadcast(
-            context,
-            Geofencer.REQUEST_CODE,
-            intent,
-            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-    }
+        get() {
+            val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+            return PendingIntent.getBroadcast(
+                context,
+                Geofencer.REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
     var geofenceString by context.sharedPreference(Geofencer.PREFS_NAME, "")
 
     @SuppressLint("MissingPermission")
     fun add(
         geofence: Geofence,
-        success: () -> Unit) {
+        success: () -> Unit
+    ) {
 
         val androidGeofence = buildGeofence(geofence)
         geofencingClient
-            .addGeofences(buildGeofencingRequest(androidGeofence), geofencePendingIntent )
+            .addGeofences(buildGeofencingRequest(androidGeofence), geofencePendingIntent)
             .addOnSuccessListener {
                 geofenceString = (getAll() + geofence).toJson()
                 success()
@@ -53,14 +50,16 @@ class GeofenceRepository(private val context: Context) {
 
     fun remove(
         geofence: Geofence,
-        success: () -> Unit) {
+        success: () -> Unit
+    ) {
         val list = getAll() - geofence
         geofenceString = list.toJson()
         success()
     }
 
     fun removeAll(
-        success: () -> Unit) {
+        success: () -> Unit
+    ) {
         geofencingClient.removeGeofences(geofencePendingIntent).run {
             addOnSuccessListener {
                 geofenceString = ""
@@ -82,7 +81,7 @@ class GeofenceRepository(private val context: Context) {
         return arrayOfReminders.toList()
     }
 
-    fun reAddAll(){
+    fun reAddAll() {
         val geofences = getAll()
         removeAll {
             geofences.forEach {

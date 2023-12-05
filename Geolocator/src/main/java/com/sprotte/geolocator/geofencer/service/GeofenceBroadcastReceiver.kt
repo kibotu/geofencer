@@ -3,11 +3,9 @@ package com.sprotte.geolocator.geofencer.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.JobIntentService
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 import com.sprotte.geolocator.geofencer.GeofenceRepository
-import com.sprotte.geolocator.geofencer.Geofencer
 import com.sprotte.geolocator.utils.enqueueOneTimeWorkRequest
 import com.sprotte.geolocator.utils.log
 
@@ -24,9 +22,9 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             return
         }
 
-        var geofencingEvent : GeofencingEvent? = GeofencingEvent.fromIntent(intent)
+        var geofencingEvent: GeofencingEvent? = GeofencingEvent.fromIntent(intent)
 
-        if(geofencingEvent == null){
+        if (geofencingEvent == null) {
             return
         }
 

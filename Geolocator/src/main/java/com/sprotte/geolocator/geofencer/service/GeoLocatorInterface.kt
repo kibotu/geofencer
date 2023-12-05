@@ -6,19 +6,19 @@ import com.sprotte.geolocator.geofencer.models.Geofence
 
 internal interface GeoLocatorInterface
 
-internal interface GeoFenceBootInterface: GeoLocatorInterface {
+internal interface GeoFenceBootInterface : GeoLocatorInterface {
     @WorkerThread
     fun readAllGeoFence()
 
 }
 
-internal interface GeoFenceUpdateInterface: GeoLocatorInterface {
+internal interface GeoFenceUpdateInterface : GeoLocatorInterface {
     @WorkerThread
     fun onGeofence(geofence: Geofence)
 
 }
 
-internal interface LocationTrackerUpdateInterface: GeoLocatorInterface {
+internal interface LocationTrackerUpdateInterface : GeoLocatorInterface {
     @WorkerThread
     fun onLocationResult(locationResult: LocationResult)
 

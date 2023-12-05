@@ -11,7 +11,7 @@ import com.sprotte.geolocator.geofencer.models.GeoFenceUpdateModule
 import com.sprotte.geolocator.geofencer.models.LocationTrackerUpdateModule
 import com.sprotte.geolocator.utils.fromJson
 
-class LocationTrackerUpdateWorker(val ctx: Context, params: WorkerParameters): Worker(ctx, params) {
+class LocationTrackerUpdateWorker(val ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
     private fun startWorker(locationResult: LocationResult, clazzNameString: String) {
         val clazz: Class<*> = Class.forName(clazzNameString)
@@ -21,7 +21,7 @@ class LocationTrackerUpdateWorker(val ctx: Context, params: WorkerParameters): W
         }
         val moduleClass = clazz as Class<out LocationTrackerUpdateModule>
         val obj = moduleClass.constructors[0].newInstance(applicationContext)
-        if(obj !is LocationTrackerUpdateModule){
+        if (obj !is LocationTrackerUpdateModule) {
             Result.failure()
             return
         }
@@ -29,14 +29,14 @@ class LocationTrackerUpdateWorker(val ctx: Context, params: WorkerParameters): W
     }
 
     override fun doWork(): Result {
-        return try{
+        return try {
             val intentString = inputData.getString(Geofencer.LOCATION_UPDATE_INTENT) ?: return Result.failure()
             val clazzName = inputData.getString(Geofencer.LOCATION_UPDATE_CLASS_NAME) ?: return Result.failure()
             val intent: Intent = Gson().fromJson(intentString)
             val result = LocationResult.extractResult(intent) ?: return Result.failure()
             startWorker(result, clazzName)
             Result.success()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Result.failure()
         }
     }

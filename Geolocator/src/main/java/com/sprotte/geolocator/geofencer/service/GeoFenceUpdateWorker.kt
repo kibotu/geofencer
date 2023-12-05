@@ -10,7 +10,7 @@ import com.sprotte.geolocator.geofencer.models.Geofence
 
 
 @Suppress("UNCHECKED_CAST")
-class GeoFenceUpdateWorker(val ctx: Context, params: WorkerParameters): Worker(ctx, params) {
+class GeoFenceUpdateWorker(val ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
     private fun startWorker(geoFence: Geofence) {
         try {
@@ -21,23 +21,23 @@ class GeoFenceUpdateWorker(val ctx: Context, params: WorkerParameters): Worker(c
             }
             val moduleClass = clazz as Class<out CoreWorkerModule>
             val obj = moduleClass.constructors[0].newInstance(applicationContext)
-            if(obj !is GeoFenceUpdateModule){
+            if (obj !is GeoFenceUpdateModule) {
                 Result.failure()
                 return
             }
             obj.onGeofence(geoFence)
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Result.failure()
         }
 
     }
 
     override fun doWork(): Result {
-        return try{
+        return try {
             val geoFenceId = inputData.getString(Geofencer.INTENT_EXTRAS_KEY) ?: return Result.failure()
             Geofencer(ctx).get(geoFenceId)?.run { startWorker(this) }
             Result.success()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Result.failure()
         }
     }

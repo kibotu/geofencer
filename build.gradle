@@ -12,7 +12,6 @@ buildscript {
         classpath plugin.buildGradleTools
         classpath plugin.kotlinGradle
         classpath plugin.gms
-        classpath plugin.dexcountGradle
     }
 }
 
@@ -25,8 +24,4 @@ allprojects {
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

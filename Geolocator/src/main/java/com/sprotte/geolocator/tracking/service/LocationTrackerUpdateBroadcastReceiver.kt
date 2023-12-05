@@ -3,7 +3,6 @@ package com.sprotte.geolocator.tracking.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.JobIntentService
 import com.google.android.gms.location.LocationResult
 import com.sprotte.geolocator.tracking.LocationTracker
 import com.sprotte.geolocator.utils.enqueueOneTimeLocationUpdateWorkRequest
@@ -49,7 +48,7 @@ class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
         val intentClassName = context.getSharedPrefs().getString(LocationTracker.PREFS_NAME, "")
         log("$intentClassName")
 
-        if(intentClassName.isNullOrEmpty()) return
+        if (intentClassName.isNullOrEmpty()) return
         enqueueOneTimeLocationUpdateWorkRequest(context, intentClassName, intent)
     }
 
