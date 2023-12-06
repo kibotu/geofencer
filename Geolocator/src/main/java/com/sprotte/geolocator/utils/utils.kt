@@ -121,14 +121,14 @@ fun enqueueOneTimeWorkRequest(ctx: Context, geoFenceId: String) {
         .build()
     val ontTimeWorkRequest = OneTimeWorkRequestBuilder<GeoFenceUpdateWorker>()
         .setInputData(inputData)
-        .addTag(GeoFenceUpdateWorker::class.simpleName.toString())
+        .addTag(GeoFenceUpdateWorker::class.qualifiedName.toString())
         .build()
     WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
 }
 
 fun enqueueOneTimeBootWorkRequest(ctx: Context) {
     val ontTimeWorkRequest = OneTimeWorkRequestBuilder<GeofenceBootWorker>()
-        .addTag(GeoFenceUpdateWorker::class.simpleName.toString())
+        .addTag(GeoFenceUpdateWorker::class.qualifiedName.toString())
         .build()
     WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
 }
@@ -141,7 +141,7 @@ fun enqueueOneTimeLocationUpdateWorkRequest(ctx: Context, componentName: String,
 
     val ontTimeWorkRequest = OneTimeWorkRequestBuilder<LocationTrackerUpdateWorker>()
         .setInputData(inputData)
-        .addTag(GeoFenceUpdateWorker::class.simpleName.toString())
+        .addTag(GeoFenceUpdateWorker::class.qualifiedName.toString())
         .build()
     WorkManager.getInstance(ctx).enqueue(ontTimeWorkRequest)
 }

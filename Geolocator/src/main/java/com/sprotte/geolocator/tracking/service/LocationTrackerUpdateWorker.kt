@@ -11,7 +11,7 @@ import com.sprotte.geolocator.geofencer.models.GeoFenceUpdateModule
 import com.sprotte.geolocator.geofencer.models.LocationTrackerUpdateModule
 import com.sprotte.geolocator.utils.fromJson
 
-class LocationTrackerUpdateWorker(val ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
+class LocationTrackerUpdateWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
     private fun startWorker(locationResult: LocationResult, clazzNameString: String) {
         val clazz: Class<*> = Class.forName(clazzNameString)

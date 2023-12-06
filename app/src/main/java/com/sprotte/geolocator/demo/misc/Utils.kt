@@ -116,7 +116,7 @@ fun sendNotification(context: Context, title: String, message: String) {
         .addParentStack(MainActivity::class.java)
         .addNextIntent(intent)
     val notificationPendingIntent = stackBuilder
-        .getPendingIntent(getUniqueId(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+        .getPendingIntent(getUniqueId(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     val notification = NotificationCompat.Builder(context,
         NOTIFICATION_CHANNEL_ID

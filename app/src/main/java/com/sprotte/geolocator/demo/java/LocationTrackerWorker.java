@@ -11,10 +11,10 @@ import com.sprotte.geolocator.geofencer.models.LocationTrackerUpdateModule;
 public class LocationTrackerWorker extends LocationTrackerUpdateModule {
 
     private Context context;
-    LocationTrackerWorker(Context context){
+
+    LocationTrackerWorker(Context context) {
         super(context);
         this.context = context;
-
     }
 
     @Override
@@ -24,6 +24,5 @@ public class LocationTrackerWorker extends LocationTrackerUpdateModule {
                 "Location Update",
                 locationResult.toString()
         );
-
     }
 }

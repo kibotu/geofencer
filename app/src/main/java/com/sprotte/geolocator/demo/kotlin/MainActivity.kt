@@ -25,24 +25,5 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 
-    @RequiresPermission(permission.ACCESS_FINE_LOCATION)
-    private fun registerGeofenceUpdates() {
-        val geofence = Geofence(
-            id = UUID.randomUUID().toString(),
-            latitude = 51.0899232,
-            longitude = 5.968358,
-            radius = 30.0,
-            title = "Germany",
-            message = "Entered Germany",
-            transitionType = com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER
-        )
-        Geofencer(this).addGeofenceWorker(geofence, NotificationWorker::class.java) { /* successfully added geofence */ }
-    }
-
-    @RequiresPermission(permission.ACCESS_FINE_LOCATION)
-    private fun registerLocationUpdateEvents() {
-        LocationTracker.requestLocationUpdates(this, LocationTrackerWorker::class.java)
-    }
-
     override fun onSupportNavigateUp() = Navigation.findNavController(this, R.id.navHost).navigateUp() || super.onSupportNavigateUp()
 }

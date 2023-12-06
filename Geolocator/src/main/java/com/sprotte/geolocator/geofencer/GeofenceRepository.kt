@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.google.android.gms.location.Geofence.Builder
 import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingRequest
@@ -20,11 +21,18 @@ class GeofenceRepository(private val context: Context) {
     private val geofencePendingIntent: PendingIntent
         get() {
             val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+
             return PendingIntent.getBroadcast(
                 context,
                 Geofencer.REQUEST_CODE,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                flags
             )
         }
 

@@ -54,7 +54,6 @@ public class AddGeoFenceActivity extends AppCompatActivity {
                 GEOFENCE_TRANSITION_ENTER);
         Geofencer geofencer = new Geofencer(this);
         geofencer.addGeofenceWorker(geofence, NotificationWorker.class, ()-> Unit.INSTANCE);
-
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)

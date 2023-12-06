@@ -1,20 +1,25 @@
 package com.sprotte.geolocator.demo.kotlin
 
 import android.content.Context
+import android.util.Log
+import androidx.core.content.edit
 import com.google.android.gms.location.LocationResult
-import com.sprotte.geolocator.demo.misc.sharedPreference
 import com.sprotte.geolocator.demo.misc.toJson
 import com.sprotte.geolocator.geofencer.models.LocationTrackerUpdateModule
+import timber.log.Timber
 
-class LocationTrackerWorker (context: Context): LocationTrackerUpdateModule(context){
-    private var location by sharedPreference(PREFERENCE_LOCATION, "")
+class LocationTrackerWorker(context: Context) : LocationTrackerUpdateModule(context) {
+
+    override fun onLocationResult(locationResult: LocationResult) {
+
+        Timber.v("locationResult=$locationResult")
+
+        sharedPreferences?.edit {
+            putString(USER_LOCATION_KEY, locationResult.toJson())
+        }
+    }
 
     companion object {
-        const val PREFERENCE_LOCATION = "preference_location"
+        const val USER_LOCATION_KEY = "user_location"
     }
-    override fun onLocationResult(locationResult: LocationResult) {
-        // store location result to shared preferences
-        location = locationResult.toJson()
-    }
-
 }

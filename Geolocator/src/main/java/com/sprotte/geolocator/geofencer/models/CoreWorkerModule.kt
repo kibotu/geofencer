@@ -10,5 +10,3 @@ abstract class CoreWorkerModule(context: Context) : GeoLocatorInterface
 abstract class GeoFenceUpdateModule(context: Context) : GeoFenceUpdateInterface
 abstract class GeoFenceBootModule(context: Context) : GeoFenceBootInterface
 abstract class LocationTrackerUpdateModule(context: Context) : LocationTrackerUpdateInterface
-
-

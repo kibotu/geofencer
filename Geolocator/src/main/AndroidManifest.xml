@@ -29,8 +29,8 @@
         </receiver>
 
         <receiver
-            android:name="com.sprotte.geolocator.tracking.service.LocationTrackerUpdateBroadcastReceiver"
-            android:exported="false">
+            android:name=".tracking.service.LocationTrackerUpdateBroadcastReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.sprotte.geolocator.tracking.service.ACTION_PROCESS_UPDATES" />
             </intent-filter>
