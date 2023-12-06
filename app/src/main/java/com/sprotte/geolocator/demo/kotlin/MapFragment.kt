@@ -81,8 +81,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     @SuppressLint("MissingPermission")
     val requestLocationPermissionLambda: ()->Unit = {
         val corePermissionFlow: (Permission)-> Unit = {
-            LocationTracker.removeLocationUpdates(requireContext())
-            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerWorker::class.java)
+
             map?.isMyLocationEnabled = it.granted
             when {
                 it.granted -> permissionGivenLambda(it)
@@ -93,25 +92,9 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
                 }
             }
         }
-
-        val belowAndroid11Flow: ()-> Unit = {
-            Timber.d("belowAndroid11Flow")
-            requireActivity().requestForegroundLocationPermission {
-                corePermissionFlow(it)
-            }
+        requireActivity().requestLocationPermission {
+            corePermissionFlow(it)
         }
-
-        val android11AndAboveFlow:()->Unit = {
-            Timber.d("android11AndAboveFlow")
-            requireActivity().requestLocationPermission {
-                corePermissionFlow(it)
-            }
-
-        }
-
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
-            belowAndroid11Flow()
-        } else android11AndAboveFlow()
     }
 
     private var hasShownPNRational = false
@@ -136,6 +119,15 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
                 return@registerForActivityResult
             }
         }
+
+    val checkNotificationPermission: ()-> Unit = {
+        // check for notification only on new permission system introduced in Android Api 33
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            requestLocationPermissionLambda()
+        }
+    }
 
     private val askForPNRationale: ()-> Unit = {
         requireActivity().showTwoButtonDialog(getString(R.string.dialog_rationale_permission)) {
@@ -202,11 +194,11 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
             this@MapFragment.map = map
             /**
              * start asking all permissions
-             * 1. Notification
+             * 1. Notification (only if running on Android 33 and above)
              * 2. FINE AND COARSE Location
-             * 3. Background Location
+             * 3. Background Location (only if running on Android 29 and above)
              * */
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            checkNotificationPermission()
             map.onMapReady()
         }
     }

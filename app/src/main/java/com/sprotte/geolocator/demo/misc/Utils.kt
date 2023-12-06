@@ -163,7 +163,7 @@ fun FragmentActivity.requestLocationPermission(block: (permission: Permission) -
     val mutableList = mutableListOf<Disposable?>()
     mutableList.add(
         requestForegroundLocationPermission {
-            if(!it.granted){
+            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.P){
                 // user did not grant this permission
                 block(it)
                 return@requestForegroundLocationPermission
