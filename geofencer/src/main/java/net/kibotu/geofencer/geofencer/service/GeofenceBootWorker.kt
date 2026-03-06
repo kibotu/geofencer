@@ -6,11 +6,11 @@ import androidx.work.WorkerParameters
 import net.kibotu.geofencer.geofencer.Geofencer
 import timber.log.Timber
 
-class GeofenceBootWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
+internal class GeofenceBootWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
 
     override suspend fun doWork(): Result {
         return try {
-            Geofencer(applicationContext).repository.reAddAll()
+            Geofencer.getRepository(applicationContext).reAddAll()
             Result.success()
         } catch (e: Exception) {
             Timber.e(e, "GeofenceBootWorker failed")

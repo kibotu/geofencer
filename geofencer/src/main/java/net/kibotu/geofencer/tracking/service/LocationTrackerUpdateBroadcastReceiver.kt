@@ -26,10 +26,12 @@ class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
 
         Timber.d("result = $result")
 
-        val intentClassName = context.getSharedPrefs().getString(LocationTracker.PREFS_NAME, "")
-        if (intentClassName.isNullOrEmpty()) return
+        LocationTracker.mutableLocations.tryEmit(result)
 
-        enqueueOneTimeLocationUpdateWorkRequest(context, intentClassName, intent.toUri(0))
+        val actionClass = context.getSharedPrefs().getString(LocationTracker.PREFS_NAME, "")
+        if (actionClass.isNullOrEmpty()) return
+
+        enqueueOneTimeLocationUpdateWorkRequest(context, actionClass, intent.toUri(0))
     }
 
     companion object {

@@ -4,15 +4,15 @@ import android.content.Context
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.android.gms.location.LocationResult
-import net.kibotu.geofencer.geofencer.models.LocationTrackerUpdateModule
+import net.kibotu.geofencer.tracking.LocationAction
 import timber.log.Timber
 
-class LocationTrackerWorker(context: Context) : LocationTrackerUpdateModule(context) {
+class LocationLogAction : LocationAction() {
 
-    override fun onLocationResult(locationResult: LocationResult) {
-        Timber.v("locationResult=$locationResult")
+    override fun onUpdate(context: Context, result: LocationResult) {
+        Timber.v("locationResult=$result")
         PreferenceManager.getDefaultSharedPreferences(context).edit {
-            putString(USER_LOCATION_KEY, locationResult.toString())
+            putString(USER_LOCATION_KEY, result.toString())
         }
     }
 

@@ -2,6 +2,7 @@ package net.kibotu.geofencer.demo
 
 import android.app.Application
 import android.content.pm.ApplicationInfo
+import net.kibotu.geofencer.geofencer.Geofencer
 import timber.log.Timber
 
 class App : Application() {
@@ -12,6 +13,7 @@ class App : Application() {
         if (isDebuggable) {
             Timber.plant(Timber.DebugTree())
         }
-        Timber.i("BridgeSampleApp initialized")
+        Geofencer.init(this)
+        Timber.i("GeofencerDemo initialized")
     }
 }

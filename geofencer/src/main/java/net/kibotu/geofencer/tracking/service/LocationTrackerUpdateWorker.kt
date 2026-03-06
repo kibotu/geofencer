@@ -6,36 +6,37 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.LocationResult
 import net.kibotu.geofencer.geofencer.Geofencer
-import net.kibotu.geofencer.geofencer.models.LocationTrackerUpdateModule
+import net.kibotu.geofencer.tracking.LocationAction
 import timber.log.Timber
 
-class LocationTrackerUpdateWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
-
-    private fun startWorker(locationResult: LocationResult, clazzNameString: String) {
-        val clazz: Class<*> = Class.forName(clazzNameString)
-        if (!LocationTrackerUpdateModule::class.java.isAssignableFrom(clazz)) {
-            return
-        }
-        @Suppress("UNCHECKED_CAST")
-        val moduleClass = clazz as Class<out LocationTrackerUpdateModule>
-        val obj = moduleClass.constructors[0].newInstance(applicationContext)
-        if (obj !is LocationTrackerUpdateModule) {
-            return
-        }
-        obj.onLocationResult(locationResult)
-    }
+internal class LocationTrackerUpdateWorker(
+    ctx: Context,
+    params: WorkerParameters,
+) : Worker(ctx, params) {
 
     override fun doWork(): Result {
         return try {
-            val intentUriString = inputData.getString(Geofencer.LOCATION_UPDATE_INTENT) ?: return Result.failure()
-            val clazzName = inputData.getString(Geofencer.LOCATION_UPDATE_CLASS_NAME) ?: return Result.failure()
-            val intent = Intent.parseUri(intentUriString, 0)
+            val intentUri = inputData.getString(Geofencer.LOCATION_UPDATE_INTENT) ?: return Result.failure()
+            val className = inputData.getString(Geofencer.LOCATION_UPDATE_CLASS_NAME) ?: return Result.failure()
+            val intent = Intent.parseUri(intentUri, 0)
             val result = LocationResult.extractResult(intent) ?: return Result.failure()
-            startWorker(result, clazzName)
+            dispatch(result, className)
             Result.success()
         } catch (e: Exception) {
             Timber.e(e, "LocationTrackerUpdateWorker failed")
             Result.failure()
+        }
+    }
+
+    private fun dispatch(result: LocationResult, className: String) {
+        try {
+            val clazz = Class.forName(className)
+            if (!LocationAction::class.java.isAssignableFrom(clazz)) return
+
+            val action = clazz.getDeclaredConstructor().newInstance() as LocationAction
+            action.onUpdate(applicationContext, result)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to dispatch location action: $className")
         }
     }
 }

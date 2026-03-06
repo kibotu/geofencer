@@ -2,55 +2,61 @@ package net.kibotu.geofencer.geofencer
 
 import android.content.Context
 import android.content.Intent
-import net.kibotu.geofencer.geofencer.models.GeoFenceUpdateModule
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import net.kibotu.geofencer.geofencer.models.Geofence
 
-class Geofencer(context: Context) {
+object Geofencer {
 
-    companion object {
-        fun parseExtras(context: Context, intent: Intent): Geofence? {
-            val id = intent.extras?.getString(INTENT_EXTRAS_KEY)
-            if (id != null) {
-                return Geofencer(context).get(id)
-            }
-            return null
-        }
+    internal const val PREFS_NAME = "GeofenceRepository"
+    internal const val REQUEST_CODE = 5999
+    internal const val INTENT_EXTRAS_KEY = "geofencesId"
+    internal const val LOCATION_UPDATE_CLASS_NAME = "location_update_worker_name"
+    internal const val LOCATION_UPDATE_INTENT = "location_update_intent_string"
 
-        const val PREFS_NAME = "GeofenceRepository"
-        const val REQUEST_CODE = 5999
-        const val INTENT_EXTRAS_KEY = "geofencesId"
-        const val LOCATION_UPDATE_CLASS_NAME = "location_update_worker_name"
-        const val LOCATION_UPDATE_INTENT = "location_update_intent_string"
+    private lateinit var repository: GeofenceRepository
+
+    internal val mutableEvents = MutableSharedFlow<GeofenceEvent>(extraBufferCapacity = 64)
+
+    val events: SharedFlow<GeofenceEvent> = mutableEvents.asSharedFlow()
+
+    fun init(context: Context) {
+        repository = GeofenceRepository(context.applicationContext)
     }
 
-    var repository = GeofenceRepository(context)
-
-    suspend fun <T : GeoFenceUpdateModule> addGeofenceWorker(
-        geofence: Geofence,
-        intent: Class<T>,
-        success: (() -> Unit)? = null
-    ) {
-        geofence.intentClassName = intent.canonicalName ?: ""
-        repository.add(geofence)
-        success?.invoke()
+    private fun requireRepository(): GeofenceRepository {
+        check(::repository.isInitialized) { "Call Geofencer.init(context) first." }
+        return repository
     }
 
-    suspend fun removeGeofence(id: String, success: () -> Unit) {
-        val geofence = repository.get(id) ?: return
-        repository.remove(geofence)
-        success()
+    suspend fun add(block: GeofenceSpec.() -> Unit) {
+        val geofence = GeofenceSpec().apply(block).build()
+        requireRepository().add(geofence)
     }
 
-    suspend fun removeAll(success: () -> Unit) {
-        repository.removeAll()
-        success()
+    suspend fun remove(id: String) {
+        val repo = requireRepository()
+        val geofence = repo.get(id) ?: return
+        repo.remove(geofence)
     }
 
-    fun get(id: String): Geofence? {
-        return repository.get(id)
+    suspend fun removeAll() {
+        requireRepository().removeAll()
     }
 
-    fun getAll(): List<Geofence> {
-        return repository.getAll()
+    val all: List<Geofence>
+        get() = requireRepository().getAll()
+
+    operator fun get(id: String): Geofence? = requireRepository().get(id)
+
+    fun parseExtras(context: Context, intent: Intent): Geofence? {
+        if (!::repository.isInitialized) init(context)
+        return intent.extras?.getString(INTENT_EXTRAS_KEY)?.let { get(it) }
+    }
+
+    internal fun getRepository(context: Context): GeofenceRepository {
+        if (!::repository.isInitialized) init(context)
+        return requireRepository()
     }
 }

@@ -1,7 +1,6 @@
 package net.kibotu.geofencer.geofencer
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -11,18 +10,17 @@ import com.google.android.gms.location.Geofence.Builder
 import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
-import net.kibotu.geofencer.R
-import net.kibotu.geofencer.geofencer.models.Geofence
-import net.kibotu.geofencer.geofencer.service.GeofenceBroadcastReceiver
-import net.kibotu.geofencer.utils.getRes
-import net.kibotu.geofencer.utils.loge
-import net.kibotu.geofencer.utils.sharedPreference
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import net.kibotu.geofencer.R
+import net.kibotu.geofencer.geofencer.models.Geofence
+import net.kibotu.geofencer.geofencer.service.GeofenceBroadcastReceiver
+import net.kibotu.geofencer.utils.loge
+import net.kibotu.geofencer.utils.sharedPreference
 import timber.log.Timber
 
-class GeofenceRepository(private val context: Context) {
+internal class GeofenceRepository(private val context: Context) {
 
     private val geofencingClient = LocationServices.getGeofencingClient(context)
 
@@ -97,16 +95,25 @@ class GeofenceRepository(private val context: Context) {
     }
 
     private fun buildGeofence(geofence: Geofence): com.google.android.gms.location.Geofence {
+        val defaultLoitering = context.resources.getInteger(R.integer.loitering_delay)
+        val defaultResponsiveness = context.resources.getInteger(R.integer.notification_responsiveness)
+
         return Builder()
             .setRequestId(geofence.id)
-            .setLoiteringDelay(context.resources.getInteger(R.integer.loitering_delay))
-            .setNotificationResponsiveness(context.resources.getInteger(R.integer.notification_responsiveness))
+            .setLoiteringDelay(
+                if (geofence.loiteringDelayMillis >= 0) geofence.loiteringDelayMillis.toInt()
+                else defaultLoitering
+            )
+            .setNotificationResponsiveness(
+                if (geofence.responsivenessMillis >= 0) geofence.responsivenessMillis.toInt()
+                else defaultResponsiveness
+            )
             .setCircularRegion(
                 geofence.latitude,
                 geofence.longitude,
                 geofence.radius.toFloat()
             )
-            .setTransitionTypes(geofence.transitionType)
+            .setTransitionTypes(geofence.transitions)
             .setExpirationDuration(NEVER_EXPIRE)
             .build()
     }

@@ -30,16 +30,16 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 import net.kibotu.geofencer.demo.R
 import net.kibotu.geofencer.demo.databinding.FragmentMapBinding
 import net.kibotu.geofencer.demo.misc.hideKeyboard
 import net.kibotu.geofencer.demo.misc.requestFocusWithKeyboard
 import net.kibotu.geofencer.demo.misc.showGeofenceInMap
+import net.kibotu.geofencer.demo.misc.showTwoButtonDialog
 import net.kibotu.geofencer.geofencer.Geofencer
 import net.kibotu.geofencer.geofencer.models.Geofence
 import net.kibotu.geofencer.tracking.LocationTracker
-import net.kibotu.geofencer.utils.showTwoButtonDialog
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -47,7 +47,11 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
     private var binding: FragmentMapBinding? = null
     private var map: GoogleMap? = null
-    private var geofence = Geofence()
+
+    private var pendingLatitude: Double = 0.0
+    private var pendingLongitude: Double = 0.0
+    private var pendingRadius: Double = 0.0
+    private var pendingMessage: String = ""
 
     private val sharedPreferences: SharedPreferences? by lazy {
         context?.let {
@@ -89,7 +93,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
             } else {
                 val shouldShowRationale = shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
                 if (shouldShowRationale) {
-                    requireActivity().showTwoButtonDialog(getString(net.kibotu.geofencer.R.string.dialog_rationale_coarse_location)) {
+                    requireActivity().showTwoButtonDialog(getString(R.string.dialog_rationale_coarse_location)) {
                         if (it) requestForegroundLocation()
                     }
                 } else {
@@ -140,8 +144,10 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
         if (hasFineLocation) {
             map?.isMyLocationEnabled = true
-            LocationTracker.removeLocationUpdates(requireContext())
-            LocationTracker.requestLocationUpdates(requireContext(), LocationTrackerWorker::class.java)
+            LocationTracker.stop(requireContext())
+            LocationTracker.start(requireContext()) {
+                action<LocationLogAction>()
+            }
             binding?.run {
                 newReminder.isVisible = true
                 currentLocation.isVisible = true
@@ -159,7 +165,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     private val preferenceChangedListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             Timber.v("OnSharedPreferenceChange key=$key")
-            if (key == LocationTrackerWorker.USER_LOCATION_KEY) {
+            if (key == LocationLogAction.USER_LOCATION_KEY) {
                 val locationResult = sharedPreferences.getString(key, null)
                 Timber.v("OnSharedPreferenceChange: $locationResult")
             }
@@ -240,14 +246,18 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         setOnMarkerClickListener(this@MapFragment)
     }
 
-    private fun addGeofence(geofence: Geofence) {
+    private fun addGeofence() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                Geofencer(requireContext())
-                    .addGeofenceWorker(geofence, NotificationWorker::class.java) {
-                        binding?.container?.isGone = true
-                        showGeofences()
-                    }
+                Geofencer.add {
+                    latitude = pendingLatitude
+                    longitude = pendingLongitude
+                    radius = pendingRadius
+                    message = pendingMessage
+                    action<NotificationAction>()
+                }
+                binding?.container?.isGone = true
+                showGeofences()
             } catch (e: Exception) {
                 Timber.e(e, "Failed to add geofence")
             }
@@ -256,20 +266,25 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
     private fun showGeofenceUpdate() {
         map?.clear()
-        showGeofenceInMap(requireContext(), map!!, geofence)
+        val preview = Geofence(
+            latitude = pendingLatitude,
+            longitude = pendingLongitude,
+            radius = pendingRadius,
+        )
+        showGeofenceInMap(requireContext(), map!!, preview)
     }
 
     private fun showGeofences() {
         map?.run {
             clear()
-            for (geofence in Geofencer(requireContext()).getAll()) {
+            for (geofence in Geofencer.all) {
                 showGeofenceInMap(requireContext(), this, geofence)
             }
         }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        val geofence = Geofencer(requireContext()).get(marker.tag as String)
+        val geofence = Geofencer[marker.tag as String]
         if (geofence != null) {
             binding?.showGeofenceRemoveAlert(geofence)
         }
@@ -300,13 +315,12 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     private fun FragmentMapBinding.removeGeofence(geofence: Geofence) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                Geofencer(requireContext()).removeGeofence(geofence.id) {
-                    showGeofences()
-                    Snackbar.make(
-                        main,
-                        R.string.reminder_removed_success, Snackbar.LENGTH_LONG
-                    ).show()
-                }
+                Geofencer.remove(geofence.id)
+                showGeofences()
+                Snackbar.make(
+                    main,
+                    R.string.reminder_removed_success, Snackbar.LENGTH_LONG
+                ).show()
             } catch (e: Exception) {
                 Timber.e(e, "Failed to remove geofence")
             }
@@ -323,8 +337,8 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         message.isGone = true
         instructionTitle.text = getString(R.string.instruction_where_description)
         next.setOnClickListener {
-            geofence.latitude = map?.cameraPosition?.target?.latitude ?: 0.0
-            geofence.longitude = map?.cameraPosition?.target?.longitude ?: 0.0
+            pendingLatitude = map?.cameraPosition?.target?.latitude ?: 0.0
+            pendingLongitude = map?.cameraPosition?.target?.longitude ?: 0.0
             showConfigureRadiusStep()
         }
         showGeofenceUpdate()
@@ -357,11 +371,11 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         instructionTitle.text = getString(R.string.instruction_message_description)
         next.setOnClickListener {
             hideKeyboard(requireContext(), message)
-            geofence.message = message.text.toString()
-            if (geofence.message.isEmpty()) {
+            pendingMessage = message.text.toString()
+            if (pendingMessage.isEmpty()) {
                 message.error = getString(R.string.error_required)
             } else {
-                addGeofence(geofence)
+                addGeofence()
             }
         }
         message.requestFocusWithKeyboard()
@@ -381,7 +395,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
     private fun FragmentMapBinding.updateRadiusWithProgress(progress: Int) {
         val radius = getRadius(progress)
-        geofence.radius = radius
+        pendingRadius = radius
         radiusDescription.text =
             getString(R.string.radius_description, radius.roundToInt().toString())
     }
