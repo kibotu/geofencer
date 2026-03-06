@@ -56,7 +56,6 @@ object LocationTracker {
         requestLocationUpdates(context.applicationContext, clasz, LocationTrackerParams(context))
     }
 
-    @SuppressLint("MissingPermission")
     fun requestLocationUpdates(
         context: Context,
         clasz: Class<*>,

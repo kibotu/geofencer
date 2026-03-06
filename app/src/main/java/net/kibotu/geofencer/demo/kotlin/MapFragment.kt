@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.view.ViewCompat
@@ -132,7 +133,6 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun onAllPermissionsGranted() {
         val hasFineLocation = ContextCompat.checkSelfPermission(
             requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
@@ -200,15 +200,13 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun FragmentMapBinding.setup() {
         newReminder.isGone = true
         currentLocation.isGone = true
 
         currentLocation.setOnClickListener {
             val locationManager = requireContext().getSystemService<LocationManager>() ?: return@setOnClickListener
-
-            @SuppressLint("MissingPermission")
             val location = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER)
             if (location != null) {
                 val latLng = LatLng(location.latitude, location.longitude)
@@ -242,7 +240,6 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         setOnMarkerClickListener(this@MapFragment)
     }
 
-    @SuppressLint("MissingPermission")
     private fun addGeofence(geofence: Geofence) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -389,7 +386,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
             getString(R.string.radius_description, radius.roundToInt().toString())
     }
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun getLastKnownLocation(): Location? {
         val locationManager = requireContext().getSystemService<LocationManager>() ?: return null
         val providers = locationManager.getProviders(true)

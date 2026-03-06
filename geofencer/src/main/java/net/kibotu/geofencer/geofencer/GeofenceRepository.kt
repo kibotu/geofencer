@@ -1,10 +1,12 @@
 package net.kibotu.geofencer.geofencer
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.annotation.RequiresPermission
 import com.google.android.gms.location.Geofence.Builder
 import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingRequest
@@ -42,7 +44,7 @@ class GeofenceRepository(private val context: Context) {
 
     var geofenceString by context.sharedPreference(Geofencer.PREFS_NAME, "")
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     suspend fun add(geofence: Geofence) {
         val androidGeofence = buildGeofence(geofence)
         geofencingClient
@@ -81,7 +83,7 @@ class GeofenceRepository(private val context: Context) {
         geofenceString = Json.encodeToString(geofences)
     }
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     suspend fun reAddAll() {
         val geofences = getAll()
         removeAll()
