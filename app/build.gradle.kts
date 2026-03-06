@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -70,11 +71,8 @@ android {
     }
     packaging {
         resources {
-            // DebugProbesKt.bin is used for java debugging (not needed for android)
             excludes += "DebugProbesKt.bin"
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            // Note: armeabi, mips, and mips64 are deprecated/removed ABIs - no longer needed in modern Android
-            // Keeping only if you have legacy dependencies that still package these
         }
     }
 
@@ -96,7 +94,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        compose = true
         buildConfig = true
     }
 }
@@ -129,23 +127,28 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(project(":geofencer"))
 
+    val composeBom = platform(libs.compose.bom)
+    implementation(composeBom)
+
+    implementation(libs.compose.material3)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.compose.runtime)
+    debugImplementation(libs.compose.ui.tooling)
+
+    implementation(libs.activity.compose)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+
     implementation(libs.kotlinx.serialization.json)
-
     implementation(libs.timber)
-
-    implementation(libs.maps.utils.ktx)
-    implementation(libs.maps.ktx)
-    implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
-
-    implementation(libs.navigation.ui.ktx)
-    implementation(libs.navigation.fragment.ktx)
-
     implementation(libs.preference.ktx)
-    implementation(libs.appcompat)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
-    implementation(libs.constraintlayout)
     implementation(libs.work.runtime.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.ktx)

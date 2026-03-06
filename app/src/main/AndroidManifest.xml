@@ -30,8 +30,6 @@
             android:name=".kotlin.MainActivity"
             android:launchMode="singleInstance">
 
-            <nav-graph android:value="@navigation/navigation_controller" />
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />

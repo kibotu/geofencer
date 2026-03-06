@@ -1,19 +1,21 @@
 package net.kibotu.geofencer.demo.kotlin
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.Navigation
-import net.kibotu.geofencer.demo.R
+import net.kibotu.geofencer.demo.ui.MapScreen
+import net.kibotu.geofencer.demo.ui.theme.GeofencerTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContent {
+            GeofencerTheme {
+                MapScreen()
+            }
+        }
     }
-
-    override fun onSupportNavigateUp() =
-        Navigation.findNavController(this, R.id.navHost).navigateUp() || super.onSupportNavigateUp()
 }

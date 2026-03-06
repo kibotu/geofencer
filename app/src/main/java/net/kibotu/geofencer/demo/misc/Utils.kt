@@ -6,93 +6,14 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Build
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import net.kibotu.geofencer.demo.BuildConfig
 import net.kibotu.geofencer.demo.R
-import net.kibotu.geofencer.demo.kotlin.BreachMarker
 import net.kibotu.geofencer.demo.kotlin.MainActivity
-import net.kibotu.geofencer.geofencer.models.Geofence
-
-fun EditText.requestFocusWithKeyboard() {
-    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    if (!hasFocus()) {
-        requestFocus()
-    }
-    post { imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT) }
-}
-
-fun hideKeyboard(context: Context, view: View) {
-    val keyboard = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    keyboard.hideSoftInputFromWindow(view.windowToken, 0)
-}
-
-fun vectorToBitmap(resources: Resources, @DrawableRes id: Int): BitmapDescriptor {
-    val vectorDrawable = ResourcesCompat.getDrawable(resources, id, null)
-    val bitmap = Bitmap.createBitmap(
-        vectorDrawable!!.intrinsicWidth,
-        vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888
-    )
-    val canvas = Canvas(bitmap)
-    vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
-    vectorDrawable.draw(canvas)
-    return BitmapDescriptorFactory.fromBitmap(bitmap)
-}
-
-fun showGeofenceInMap(
-    context: Context,
-    map: GoogleMap,
-    geofence: Geofence
-) {
-    val latLng = LatLng(geofence.latitude, geofence.longitude)
-    val vectorToBitmap = vectorToBitmap(
-        context.resources,
-        R.drawable.ic_twotone_location_on_48px
-    )
-    val marker = map.addMarker(MarkerOptions().position(latLng).icon(vectorToBitmap))
-    marker?.tag = geofence.id
-    map.addCircle(
-        CircleOptions()
-            .center(latLng)
-            .radius(geofence.radius)
-            .strokeColor(ContextCompat.getColor(context, R.color.colorAccent))
-            .fillColor(ContextCompat.getColor(context, R.color.colorReminderFill))
-    )
-}
-
-fun showBreachMarkerOnMap(
-    context: Context,
-    map: GoogleMap,
-    breach: BreachMarker,
-) {
-    val latLng = LatLng(breach.latitude, breach.longitude)
-    val icon = vectorToBitmap(context.resources, R.drawable.ic_breach_marker)
-    val label = breach.geofenceLabel.ifEmpty { breach.geofenceId.take(8) }
-    map.addMarker(
-        MarkerOptions()
-            .position(latLng)
-            .icon(icon)
-            .title("${breach.transition}: $label")
-            .anchor(0.5f, 1.0f)
-    )
-}
 
 private const val NOTIFICATION_CHANNEL_ID = BuildConfig.APPLICATION_ID + ".channel"
 
