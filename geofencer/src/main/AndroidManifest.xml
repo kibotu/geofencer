@@ -8,12 +8,12 @@
     <application>
 
         <receiver
-            android:name="com.sprotte.geofencer.geofencer.service.GeofenceBroadcastReceiver"
+            android:name="net.kibotu.geofencer.geofencer.service.GeofenceBroadcastReceiver"
             android:enabled="true"
             android:exported="false" />
 
         <receiver
-            android:name="com.sprotte.geofencer.geofencer.service.GeofenceBootReceiver"
+            android:name="net.kibotu.geofencer.geofencer.service.GeofenceBootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -28,7 +28,7 @@
             android:name=".tracking.service.LocationTrackerUpdateBroadcastReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.sprotte.geofencer.tracking.service.ACTION_PROCESS_UPDATES" />
+                <action android:name="net.kibotu.geofencer.tracking.service.ACTION_PROCESS_UPDATES" />
             </intent-filter>
         </receiver>
 

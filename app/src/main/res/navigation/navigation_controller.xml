@@ -6,6 +6,6 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.sprotte.geofencer.demo.kotlin.MapFragment"
+        android:name="net.kibotu.geofencer.demo.kotlin.MapFragment"
         android:label="MapFragment" />
 </navigation>

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sprotte.geofencer.demo"
+    namespace = "net.kibotu.geofencer.demo"
 
     compileSdk {
         version = release(36) {
@@ -13,7 +13,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = project.findProperty("APPLICATION_ID") as String? ?: "com.sprotte.geofencer"
+        applicationId = project.findProperty("APPLICATION_ID") as String? ?: "net.kibotu.geofencer"
         minSdk = 23
         targetSdk = 36
         versionCode = (project.findProperty("versionCode") as String?)?.toIntOrNull() ?: 1
@@ -66,6 +66,15 @@ android {
         }
         language {
             enableSplit = false
+        }
+    }
+    packaging {
+        resources {
+            // DebugProbesKt.bin is used for java debugging (not needed for android)
+            excludes += "DebugProbesKt.bin"
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Note: armeabi, mips, and mips64 are deprecated/removed ABIs - no longer needed in modern Android
+            // Keeping only if you have legacy dependencies that still package these
         }
     }
 

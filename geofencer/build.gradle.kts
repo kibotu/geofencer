@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sprotte.geofencer"
+    namespace = "net.kibotu.geofencer"
 
     compileSdk {
         version = release(36) {
@@ -48,6 +48,7 @@ android {
 
     publishing {
         singleVariant("release") {
+            withJavadocJar()
             withSourcesJar()
         }
     }
@@ -86,7 +87,7 @@ afterEvaluate {
         publications {
             register<MavenPublication>("release") {
                 from(components.findByName("release"))
-                groupId = "com.github.exozet"
+                groupId = "net.kibotu"
                 artifactId = "geofencer"
                 version = "3.0.0"
             }
