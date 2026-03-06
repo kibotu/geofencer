@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -9,13 +9,9 @@
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="@dimen/zero_dp"
-        android:layout_height="@dimen/zero_dp"
-        android:padding="@dimen/activity_horizontal_margin"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/activity_horizontal_margin" />
 
     <LinearLayout
         android:id="@+id/fabContainer"
@@ -23,9 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:orientation="vertical">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/currentLocation"
@@ -35,6 +29,15 @@
             app:srcCompat="@drawable/ic_baseline_my_location_24px" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/toggleLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:contentDescription="@string/toggle_event_log"
+            app:fabSize="mini"
+            app:srcCompat="@android:drawable/ic_menu_recent_history" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/newReminder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,16 +45,12 @@
             app:srcCompat="@drawable/ic_baseline_add_24px" />
     </LinearLayout>
 
+    <!-- Geofence creation overlay -->
     <RelativeLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/marker"
@@ -139,7 +138,85 @@
 
         </LinearLayout>
 
-
     </RelativeLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Live event log bottom sheet -->
+    <LinearLayout
+        android:id="@+id/eventLogSheet"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:background="@drawable/bg_event_log_sheet"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="56dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <!-- Handle bar -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_handle" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/activity_horizontal_margin"
+            android:paddingVertical="@dimen/eight_dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/event_log_title"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="@dimen/sixteen_sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/clearLog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:paddingHorizontal="@dimen/eight_dp"
+                android:text="@string/clear_log"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/fourteen_sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1F000000" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/eventLogList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/eight_dp"
+            tools:listitem="@layout/item_event_log" />
+
+        <TextView
+            android:id="@+id/eventLogEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/event_log_empty"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="@dimen/fourteen_sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

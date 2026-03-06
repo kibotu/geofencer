@@ -1,9 +1,7 @@
 package net.kibotu.geofencer.demo.kotlin
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
@@ -23,12 +21,18 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import net.kibotu.geofencer.demo.R
@@ -53,11 +57,8 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
     private var pendingRadius: Double = 0.0
     private var pendingMessage: String = ""
 
-    private val sharedPreferences: SharedPreferences? by lazy {
-        context?.let {
-            androidx.preference.PreferenceManager.getDefaultSharedPreferences(it)
-        }
-    }
+    private val logAdapter = EventLogAdapter()
+    private var bottomSheet: BottomSheetBehavior<*>? = null
 
     // region Permission launchers
 
@@ -157,19 +158,16 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         val location = getLastKnownLocation()
         if (location != null) {
             val latLng = LatLng(location.latitude, location.longitude)
-            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f))
+            val cameraPosition = CameraPosition.Builder()
+                .target(latLng)
+                .zoom(17f)
+                .tilt(45f)
+                .bearing(0f)
+                .build()
+            map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         }
         showGeofences()
     }
-
-    private val preferenceChangedListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            Timber.v("OnSharedPreferenceChange key=$key")
-            if (key == LocationLogAction.USER_LOCATION_KEY) {
-                val locationResult = sharedPreferences.getString(key, null)
-                Timber.v("OnSharedPreferenceChange: $locationResult")
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -185,7 +183,8 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         super.onViewCreated(view, savedInstanceState)
         binding?.setup()
         binding?.applySystemInsets()
-        sharedPreferences?.registerOnSharedPreferenceChangeListener(preferenceChangedListener)
+        binding?.setupEventLog()
+        observeLiveEvents()
     }
 
     private fun FragmentMapBinding.applySystemInsets() {
@@ -232,8 +231,71 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
+    private fun FragmentMapBinding.setupEventLog() {
+        val sheet = BottomSheetBehavior.from(eventLogSheet)
+        sheet.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheet = sheet
+
+        eventLogList.layoutManager = LinearLayoutManager(requireContext())
+        eventLogList.adapter = logAdapter
+        updateEmptyState()
+
+        toggleLog.setOnClickListener {
+            if (eventLogSheet.isVisible && sheet.state != BottomSheetBehavior.STATE_HIDDEN) {
+                sheet.state = BottomSheetBehavior.STATE_HIDDEN
+            } else {
+                eventLogSheet.isVisible = true
+                sheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        }
+
+        clearLog.setOnClickListener {
+            logAdapter.clear()
+            updateEmptyState()
+        }
+
+        sheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    eventLogSheet.isGone = true
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+    }
+
+    private fun observeLiveEvents() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    LocationTracker.locations.collect { result ->
+                        logAdapter.add(LogEntry.Location(result))
+                        updateEmptyState()
+                        binding?.eventLogList?.scrollToPosition(0)
+                    }
+                }
+                launch {
+                    Geofencer.events.collect { event ->
+                        logAdapter.add(LogEntry.Fence(event))
+                        updateEmptyState()
+                        binding?.eventLogList?.scrollToPosition(0)
+                        showGeofences()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateEmptyState() {
+        binding?.run {
+            eventLogEmpty.isVisible = logAdapter.isEmpty
+            eventLogList.isVisible = !logAdapter.isEmpty
+        }
+    }
+
     override fun onDestroyView() {
-        sharedPreferences?.unregisterOnSharedPreferenceChangeListener(preferenceChangedListener)
+        bottomSheet = null
         map = null
         binding = null
         super.onDestroyView()
@@ -244,6 +306,20 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         uiSettings.isMapToolbarEnabled = false
         uiSettings.isZoomControlsEnabled = true
         setOnMarkerClickListener(this@MapFragment)
+        setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style_pokemon_go))
+        isBuildingsEnabled = true
+
+        val mapView = (childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view
+        if (mapView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mapView) { _, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+                )
+                setPadding(insets.left, insets.top, insets.right, insets.bottom)
+                windowInsets
+            }
+            mapView.requestApplyInsets()
+        }
     }
 
     private fun addGeofence() {
