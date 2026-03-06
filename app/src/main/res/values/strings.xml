@@ -29,4 +29,6 @@
     <string name="event_log_empty">Waiting for events…</string>
     <string name="clear_log">Clear</string>
     <string name="toggle_event_log">Toggle event log</string>
+    <string name="map_style">Map style</string>
+    <string name="map_style_picker_title">Choose map style</string>
 </resources>

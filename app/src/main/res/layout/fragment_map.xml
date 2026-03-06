@@ -10,38 +10,53 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/activity_horizontal_margin" />
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/fabContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:orientation="vertical">
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        app:layout_dodgeInsetEdges="bottom">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/mapStyleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/eight_dp"
+            android:contentDescription="@string/map_style"
+            app:fabCustomSize="36dp"
+            app:maxImageSize="20dp"
+            app:srcCompat="@android:drawable/ic_menu_mapmode" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/currentLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/eight_dp"
+            app:fabCustomSize="36dp"
+            app:maxImageSize="20dp"
             app:srcCompat="@drawable/ic_baseline_my_location_24px" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/toggleLog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/eight_dp"
             android:contentDescription="@string/toggle_event_log"
-            app:fabSize="mini"
+            app:fabCustomSize="36dp"
+            app:maxImageSize="20dp"
             app:srcCompat="@android:drawable/ic_menu_recent_history" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/newReminder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin"
+            app:fabCustomSize="36dp"
+            app:maxImageSize="20dp"
             app:srcCompat="@drawable/ic_baseline_add_24px" />
     </LinearLayout>
 
@@ -66,6 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="#ffffff"
+            android:elevation="8dp"
             android:orientation="vertical">
 
             <TextView
@@ -153,7 +169,8 @@
         android:visibility="gone"
         app:behavior_hideable="true"
         app:behavior_peekHeight="56dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        app:layout_insetEdge="bottom">
 
         <!-- Handle bar -->
         <View

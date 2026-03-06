@@ -2,6 +2,7 @@ package net.kibotu.geofencer.demo.kotlin
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
@@ -39,10 +40,12 @@ import net.kibotu.geofencer.demo.R
 import net.kibotu.geofencer.demo.databinding.FragmentMapBinding
 import net.kibotu.geofencer.demo.misc.hideKeyboard
 import net.kibotu.geofencer.demo.misc.requestFocusWithKeyboard
+import net.kibotu.geofencer.demo.misc.showBreachMarkerOnMap
 import net.kibotu.geofencer.demo.misc.showGeofenceInMap
 import net.kibotu.geofencer.demo.misc.showTwoButtonDialog
 import net.kibotu.geofencer.geofencer.Geofencer
 import net.kibotu.geofencer.geofencer.models.Geofence
+import net.kibotu.geofencer.geofencer.models.Geofence.Transition
 import net.kibotu.geofencer.tracking.LocationTracker
 import timber.log.Timber
 import kotlin.math.roundToInt
@@ -59,6 +62,11 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
     private val logAdapter = EventLogAdapter()
     private var bottomSheet: BottomSheetBehavior<*>? = null
+    private var currentMapStyle: MapStyle = MapStyle.POKEMON_GO
+
+    private val prefs by lazy {
+        requireContext().getSharedPreferences("geofencer_prefs", Context.MODE_PRIVATE)
+    }
 
     // region Permission launchers
 
@@ -192,7 +200,9 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
             val insets = windowInsets.getInsets(
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
-            v.updatePadding(bottom = insets.bottom, right = insets.right)
+            val lp = v.layoutParams as ViewGroup.MarginLayoutParams
+            lp.marginEnd = insets.right + resources.getDimensionPixelSize(R.dimen.activity_horizontal_margin)
+            v.layoutParams = lp
             windowInsets
         }
 
@@ -201,6 +211,14 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime()
             )
             v.updatePadding(bottom = insets.bottom, left = insets.left, right = insets.right)
+            windowInsets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(eventLogSheet) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.updatePadding(bottom = insets.bottom)
             windowInsets
         }
     }
@@ -221,6 +239,10 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
 
         newReminder.setOnClickListener {
             showConfigureLocationStep()
+        }
+
+        mapStyleButton.setOnClickListener {
+            showMapStylePicker()
         }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -261,7 +283,10 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
                 }
             }
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                val sheetVisibleHeight = bottomSheet.parent.let { (it as View).height } - bottomSheet.top
+                fabContainer.translationY = -sheetVisibleHeight.toFloat()
+            }
         })
     }
 
@@ -280,6 +305,16 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
                         logAdapter.add(LogEntry.Fence(event))
                         updateEmptyState()
                         binding?.eventLogList?.scrollToPosition(0)
+                        if (event.hasTriggeringLocation) {
+                            val marker = BreachMarker(
+                                latitude = event.triggeringLatitude,
+                                longitude = event.triggeringLongitude,
+                                geofenceId = event.geofence.id,
+                                geofenceLabel = event.geofence.label,
+                                transition = event.transition.name,
+                            )
+                            BreachMarkerRepository.add(requireContext(), marker)
+                        }
                         showGeofences()
                     }
                 }
@@ -306,8 +341,10 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         uiSettings.isMapToolbarEnabled = false
         uiSettings.isZoomControlsEnabled = true
         setOnMarkerClickListener(this@MapFragment)
-        setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style_pokemon_go))
         isBuildingsEnabled = true
+
+        currentMapStyle = MapStyle.fromName(prefs.getString("map_style", null) ?: MapStyle.POKEMON_GO.name)
+        applyMapStyle(currentMapStyle)
 
         val mapView = (childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view
         if (mapView != null) {
@@ -322,6 +359,33 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
         }
     }
 
+    private fun applyMapStyle(style: MapStyle) {
+        currentMapStyle = style
+        map?.apply {
+            mapType = style.mapType
+            isBuildingsEnabled = true
+            if (style.styleRes != null) {
+                setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), style.styleRes))
+            } else {
+                setMapStyle(null)
+            }
+        }
+        prefs.edit().putString("map_style", style.name).apply()
+    }
+
+    private fun showMapStylePicker() {
+        val styles = MapStyle.entries.toTypedArray()
+        val names = styles.map { it.displayName }.toTypedArray()
+        val checkedIndex = styles.indexOf(currentMapStyle)
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.map_style_picker_title)
+            .setSingleChoiceItems(names, checkedIndex) { dialog, which ->
+                applyMapStyle(styles[which])
+                dialog.dismiss()
+            }
+            .show()
+    }
+
     private fun addGeofence() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -330,6 +394,7 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
                     longitude = pendingLongitude
                     radius = pendingRadius
                     message = pendingMessage
+                    transitions = Transition.Enter + Transition.Exit
                     action<NotificationAction>()
                 }
                 binding?.container?.isGone = true
@@ -355,6 +420,9 @@ class MapFragment : Fragment(), GoogleMap.OnMarkerClickListener {
             clear()
             for (geofence in Geofencer.all) {
                 showGeofenceInMap(requireContext(), this, geofence)
+            }
+            for (breach in BreachMarkerRepository.getAll(requireContext())) {
+                showBreachMarkerOnMap(requireContext(), this, breach)
             }
         }
     }

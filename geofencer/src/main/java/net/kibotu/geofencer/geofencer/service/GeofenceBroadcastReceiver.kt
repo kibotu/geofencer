@@ -38,12 +38,24 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val repo = Geofencer.getRepository(context)
         val geofence = repo.get(triggeringGeofences[0].requestId) ?: return
 
-        val event = GeofenceEvent(geofence, transition)
+        val triggeringLocation = geofencingEvent.triggeringLocation
+        val event = GeofenceEvent(
+            geofence = geofence,
+            transition = transition,
+            triggeringLatitude = triggeringLocation?.latitude ?: Double.NaN,
+            triggeringLongitude = triggeringLocation?.longitude ?: Double.NaN,
+        )
         Geofencer.mutableEvents.tryEmit(event)
 
         Timber.d("Enqueuing work for geofence=${geofence.id}, actionClass=${geofence.actionClass}")
         if (geofence.actionClass.isNotEmpty()) {
-            enqueueOneTimeWorkRequest(context, geofence.id)
+            enqueueOneTimeWorkRequest(
+                ctx = context,
+                geoFenceId = geofence.id,
+                transitionType = geofenceTransition,
+                triggeringLatitude = triggeringLocation?.latitude ?: Double.NaN,
+                triggeringLongitude = triggeringLocation?.longitude ?: Double.NaN,
+            )
         }
     }
 }

@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import net.kibotu.geofencer.demo.BuildConfig
 import net.kibotu.geofencer.demo.R
+import net.kibotu.geofencer.demo.kotlin.BreachMarker
 import net.kibotu.geofencer.demo.kotlin.MainActivity
 import net.kibotu.geofencer.geofencer.models.Geofence
 
@@ -73,6 +74,23 @@ fun showGeofenceInMap(
             .radius(geofence.radius)
             .strokeColor(ContextCompat.getColor(context, R.color.colorAccent))
             .fillColor(ContextCompat.getColor(context, R.color.colorReminderFill))
+    )
+}
+
+fun showBreachMarkerOnMap(
+    context: Context,
+    map: GoogleMap,
+    breach: BreachMarker,
+) {
+    val latLng = LatLng(breach.latitude, breach.longitude)
+    val icon = vectorToBitmap(context.resources, R.drawable.ic_breach_marker)
+    val label = breach.geofenceLabel.ifEmpty { breach.geofenceId.take(8) }
+    map.addMarker(
+        MarkerOptions()
+            .position(latLng)
+            .icon(icon)
+            .title("${breach.transition}: $label")
+            .anchor(0.5f, 1.0f)
     )
 }
 

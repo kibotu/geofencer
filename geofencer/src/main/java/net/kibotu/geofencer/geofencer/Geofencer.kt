@@ -12,6 +12,9 @@ object Geofencer {
     internal const val PREFS_NAME = "GeofenceRepository"
     internal const val REQUEST_CODE = 5999
     internal const val INTENT_EXTRAS_KEY = "geofencesId"
+    internal const val EXTRA_TRANSITION_TYPE = "geofence_transition_type"
+    internal const val EXTRA_TRIGGERING_LAT = "geofence_triggering_lat"
+    internal const val EXTRA_TRIGGERING_LNG = "geofence_triggering_lng"
     internal const val LOCATION_UPDATE_CLASS_NAME = "location_update_worker_name"
     internal const val LOCATION_UPDATE_INTENT = "location_update_intent_string"
 

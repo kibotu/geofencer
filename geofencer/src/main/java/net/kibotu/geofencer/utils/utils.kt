@@ -52,9 +52,18 @@ internal fun Context.getRes(resInt: Int): Long {
     return applicationContext.resources.getInteger(resInt).toLong()
 }
 
-internal fun enqueueOneTimeWorkRequest(ctx: Context, geoFenceId: String) {
+internal fun enqueueOneTimeWorkRequest(
+    ctx: Context,
+    geoFenceId: String,
+    transitionType: Int = -1,
+    triggeringLatitude: Double = Double.NaN,
+    triggeringLongitude: Double = Double.NaN,
+) {
     val inputData: Data = Data.Builder()
         .putString(Geofencer.INTENT_EXTRAS_KEY, geoFenceId)
+        .putInt(Geofencer.EXTRA_TRANSITION_TYPE, transitionType)
+        .putDouble(Geofencer.EXTRA_TRIGGERING_LAT, triggeringLatitude)
+        .putDouble(Geofencer.EXTRA_TRIGGERING_LNG, triggeringLongitude)
         .build()
     val oneTimeWorkRequest = OneTimeWorkRequestBuilder<GeoFenceUpdateWorker>()
         .setInputData(inputData)
