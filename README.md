@@ -180,30 +180,6 @@ The library declares these permissions in its manifest (merged automatically):
 
 Your app must request `ACCESS_FINE_LOCATION` (and `ACCESS_BACKGROUND_LOCATION` on Android 10+) at runtime before adding geofences or starting location tracking.
 
-## Publishing
-
-### Maven Central (CI)
-
-Pushing a semver tag (e.g. `3.0.0`) triggers the GitHub Actions workflow to publish to Maven Central. Required repository secrets:
-
-| Secret | Description |
-|---|---|
-| `MAVEN_CENTRAL_USER_NAME` | Sonatype OSSRH username |
-| `MAVEN_CENTRAL_PASSWORD` | Sonatype OSSRH password / token |
-| `SIGNING_IN_MEMORY_KEY` | GPG private key (ASCII-armored) |
-| `SIGNING_IN_MEMORY_KEY_ID` | GPG key ID (last 8 hex chars) |
-| `SIGNING_IN_MEMORY_KEY_PASSWORD` | GPG key passphrase |
-
-### JitPack
-
-JitPack builds are automatic. Use `com.github.kibotu:geofencer:<tag>` as the coordinate. The `jitpack.yml` at the project root controls the build.
-
-### Local
-
-```bash
-./gradlew :geofencer:publishToMavenLocal
-```
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request.
@@ -213,7 +189,7 @@ Contributions are welcome! Please open an issue or submit a pull request.
 ```
 MIT License
 
-Copyright (c) 2023 Geofencer Developers
+Copyright (c) 2026 Geofencer Developers
 ```
 
 See [LICENSE](LICENSE) for the full text.
