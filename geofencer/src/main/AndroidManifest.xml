@@ -34,13 +34,10 @@
         </receiver>
 
         <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false">
-            <meta-data
-                android:name="net.kibotu.geofencer.internal.GeofencerInitializer"
-                android:value="androidx.startup" />
-        </provider>
+            android:name="net.kibotu.geofencer.internal.GeofencerInitializer"
+            android:authorities="${applicationId}.geofencer-init"
+            android:exported="false"
+            android:initOrder="@integer/geofencer_init_priority" />
 
     </application>
 

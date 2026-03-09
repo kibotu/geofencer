@@ -10,12 +10,12 @@ Convenience library to receive user location updates and geofence events with mi
 
 - [Features](#features)
 - [Installation](#installation)
+- [Initialization](#initialization)
 - [Quick Start](#quick-start)
   - [Geofencing](#geofencing)
   - [Location Tracking](#location-tracking)
 - [API Reference](#api-reference)
 - [Permissions](#permissions)
-- [Publishing](#publishing)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -27,7 +27,7 @@ Convenience library to receive user location updates and geofence events with mi
 - Geofence transitions: enter, exit, dwell
 - Continuous location updates via `SharedFlow`
 - Survives app kill and device reboot (via WorkManager)
-- Auto-initializes with AndroidX Startup
+- Auto-initializes via built-in ContentProvider (no external dependencies)
 - Configurable update intervals, displacement, and priority
 - Custom actions for geofence and location events
 - minSdk 23, targets Android 15+
@@ -56,6 +56,47 @@ Then add the dependency:
 
 ```kotlin
 implementation("com.github.kibotu:geofencer:latest")
+```
+
+## Initialization
+
+The library auto-initializes using a `ContentProvider` — no manual setup needed.
+
+### Customizing init order
+
+The `ContentProvider` uses `android:initOrder` to control initialization priority relative to other providers. The default value is `100`. Higher values mean the provider is initialized earlier.
+
+Override the priority in your app's `res/values/integers.xml` (or any values resource file):
+
+```xml
+<resources>
+    <integer name="geofencer_init_priority">200</integer>
+</resources>
+```
+
+### Disabling auto-initialization
+
+Add a boolean resource override in your app's `res/values/` to disable the `ContentProvider` from initializing the library:
+
+```xml
+<resources>
+    <bool name="geofencer_auto_init_enabled">false</bool>
+</resources>
+```
+
+Then initialize manually in your `Application.onCreate()`:
+
+```kotlin
+Geofencer.init(applicationContext)
+```
+
+Alternatively, you can remove the provider entirely via manifest merging:
+
+```xml
+<provider
+    android:name="net.kibotu.geofencer.internal.GeofencerInitializer"
+    android:authorities="${applicationId}.geofencer-init"
+    tools:node="remove" />
 ```
 
 ## Quick Start

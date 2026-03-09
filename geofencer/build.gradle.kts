@@ -6,6 +6,7 @@ plugins {
 
 android {
     namespace = "net.kibotu.geofencer"
+    resourcePrefix = "geofencer_"
 
     compileSdk {
         version = release(36) {
@@ -75,6 +76,5 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.core.ktx)
     implementation(libs.work.runtime.ktx)
-    implementation(libs.startup.runtime)
     implementation(libs.timber)
 }

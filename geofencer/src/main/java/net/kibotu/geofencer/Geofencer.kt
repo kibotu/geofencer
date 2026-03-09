@@ -27,7 +27,7 @@ object Geofencer {
 
     private fun requireRepository(): GeofenceRepository {
         check(::repository.isInitialized) {
-            "Geofencer not initialized. Add androidx.startup dependency or call Geofencer.init(context)."
+            "Geofencer not initialized. Ensure GeofencerInitializer ContentProvider runs or call Geofencer.init(context) manually."
         }
         return repository
     }

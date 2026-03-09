@@ -1,10 +1,18 @@
 <resources>
-    <plurals name="num_locations_reported">
+    <plurals name="geofencer_num_locations_reported">
         <item quantity="zero">No location reported</item>
         <item quantity="one">One location reported</item>
         <item quantity="other">%d locations reported</item>
     </plurals>
-    <string name="dialog_rationale_coarse_location">We need GPS Location in background so that we can guide you when you are at that locations</string>
-    <string name="button_allow">Allow</string>
-    <string name="button_reject">Reject</string>
+    <string name="geofencer_dialog_rationale_coarse_location">We need GPS Location in background so that we can guide you when you are at that locations</string>
+    <string name="geofencer_button_allow">Allow</string>
+    <string name="geofencer_button_reject">Reject</string>
+
+    <!-- ContentProvider init order for GeofencerInitializer.
+         Higher values = earlier initialization relative to other providers.
+         Override in your app's res/values to change priority. -->
+    <integer name="geofencer_init_priority">100</integer>
+
+    <!-- Set to false in your app's res/values to disable auto-initialization. -->
+    <bool name="geofencer_auto_init_enabled">true</bool>
 </resources>
