@@ -4,7 +4,7 @@
 
 
     <string name="instruction_where_description">Where do you want to add a geofence?</string>
-    <string name="instruction_where_subtitle_description">Drag the map to set the location</string>
+    <string name="instruction_where_subtitle_description">Drag the marker to adjust the location</string>
     <string name="instruction_radius_description">Choose the radius</string>
     <string name="instruction_message_description">Enter the message</string>
     <string name="continue_description">Continue</string>
@@ -32,4 +32,11 @@
     <string name="map_style">Map style</string>
     <string name="map_style_picker_title">Choose map style</string>
     <string name="high_frequency_tracking">High-frequency tracking</string>
+    <string name="toggle_tracking">Toggle location tracking</string>
+
+    <string name="search_street">Search address</string>
+    <string name="search_hint">Search street or address…</string>
+    <string name="search_no_results">No results found</string>
+    <string name="search_error">Search failed, try again</string>
+    <string name="drag_marker_hint">Drag the marker to adjust</string>
 </resources>

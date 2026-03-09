@@ -2,7 +2,9 @@ package net.kibotu.geofencer.demo.ui
 
 import android.app.Application
 import android.content.Context
+import android.location.Geocoder
 import android.location.LocationManager
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +13,10 @@ import androidx.core.content.getSystemService
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import com.google.android.gms.location.Priority
 import net.kibotu.geofencer.Geofence
 import net.kibotu.geofencer.Geofence.Transition
@@ -24,7 +29,13 @@ import net.kibotu.geofencer.demo.kotlin.LogEntry
 import net.kibotu.geofencer.demo.kotlin.MapStyle
 import net.kibotu.geofencer.demo.kotlin.NotificationAction
 import timber.log.Timber
+import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.seconds
+
+data class AddressResult(
+    val addressLine: String,
+    val latLng: LatLng,
+)
 
 sealed interface WizardState {
     data object Hidden : WizardState
@@ -55,11 +66,25 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     var breachMarkers by mutableStateOf(BreachMarkerRepository.getAll(application))
         private set
 
+    var isTracking by mutableStateOf(prefs.getBoolean(KEY_TRACKING, true))
+        private set
+
     var permissionsGranted by mutableStateOf(false)
         private set
 
     var markerToRemove by mutableStateOf<Geofence?>(null)
         private set
+
+    var showSearch by mutableStateOf(false)
+        private set
+
+    var searchQuery by mutableStateOf("")
+        private set
+
+    var searchResults by mutableStateOf<List<AddressResult>>(emptyList())
+        private set
+
+    private var searchJob: Job? = null
 
     val wizardPreview: Geofence?
         get() = when (val state = wizardState) {
@@ -136,13 +161,24 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onPermissionsGranted() {
         permissionsGranted = true
-        startLocationTracking()
+        if (isTracking) startLocationTracking()
+    }
+
+    fun toggleTracking() {
+        isTracking = !isTracking
+        prefs.edit().putBoolean(KEY_TRACKING, isTracking).apply()
+        if (!permissionsGranted) return
+        if (isTracking) {
+            startLocationTracking()
+        } else {
+            stopLocationTracking()
+        }
     }
 
     fun toggleHighFrequencyTracking() {
         highFrequencyTracking = !highFrequencyTracking
         prefs.edit().putBoolean(KEY_HIGH_FREQUENCY, highFrequencyTracking).apply()
-        if (permissionsGranted) startLocationTracking()
+        if (permissionsGranted && isTracking) startLocationTracking()
     }
 
     private fun startLocationTracking() {
@@ -164,6 +200,11 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
             }
         }.onFailure { Timber.e(it, "Failed to start location updates") }
+    }
+
+    private fun stopLocationTracking() {
+        val context = getApplication<Application>()
+        LocationTracker.stop(context)
     }
 
     fun getLastKnownLatLng(): LatLng? {
@@ -198,9 +239,10 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateWizardLocation(latLng: LatLng) {
-        val state = wizardState
-        if (state is WizardState.PickLocation) {
-            wizardState = state.copy(latLng = latLng)
+        when (val state = wizardState) {
+            is WizardState.PickLocation -> wizardState = state.copy(latLng = latLng)
+            is WizardState.PickRadius -> wizardState = state.copy(latLng = latLng)
+            else -> {}
         }
     }
 
@@ -269,8 +311,75 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun openSearch() {
+        showSearch = true
+        searchQuery = ""
+        searchResults = emptyList()
+    }
+
+    fun closeSearch() {
+        showSearch = false
+        searchQuery = ""
+        searchResults = emptyList()
+        searchJob?.cancel()
+    }
+
+    fun updateSearchQuery(query: String) {
+        searchQuery = query
+        searchJob?.cancel()
+        if (query.length < 3) {
+            searchResults = emptyList()
+            return
+        }
+        searchJob = viewModelScope.launch {
+            delay(400)
+            searchResults = geocode(query)
+        }
+    }
+
+    fun onSearchResultSelected(result: AddressResult) {
+        closeSearch()
+        startWizard(result.latLng)
+    }
+
+    @Suppress("DEPRECATION")
+    private suspend fun geocode(query: String): List<AddressResult> {
+        val context = getApplication<Application>()
+        if (!Geocoder.isPresent()) return emptyList()
+        val geocoder = Geocoder(context)
+        return try {
+            val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                suspendCancellableCoroutine { cont ->
+                    geocoder.getFromLocationName(query, 5) { addresses ->
+                        cont.resume(addresses)
+                    }
+                }
+            } else {
+                geocoder.getFromLocationName(query, 5) ?: emptyList()
+            }
+            addresses
+                .filter { it.hasLatitude() && it.hasLongitude() }
+                .map { addr ->
+                    val line = buildString {
+                        for (i in 0..addr.maxAddressLineIndex) {
+                            if (i > 0) append(", ")
+                            append(addr.getAddressLine(i))
+                        }
+                    }
+                    AddressResult(
+                        addressLine = line,
+                        latLng = LatLng(addr.latitude, addr.longitude),
+                    )
+                }
+        } catch (e: Exception) {
+            Timber.e(e, "Geocoding failed for: $query")
+            emptyList()
+        }
+    }
+
     companion object {
         private const val MAX_LOG_ENTRIES = 200
         private const val KEY_HIGH_FREQUENCY = "high_frequency_tracking"
+        private const val KEY_TRACKING = "tracking_enabled"
     }
 }

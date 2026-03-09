@@ -43,7 +43,9 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 import net.kibotu.geofencer.demo.R
+import net.kibotu.geofencer.demo.ui.components.AddressSearchOverlay
 import net.kibotu.geofencer.demo.ui.components.BreachMarkerContent
+import net.kibotu.geofencer.demo.ui.components.DraggableWizardMarker
 import net.kibotu.geofencer.demo.ui.components.EventLogSheet
 import net.kibotu.geofencer.demo.ui.components.FabColumn
 import net.kibotu.geofencer.demo.ui.components.GeofenceMapContent
@@ -140,15 +142,32 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 for (breach in viewModel.breachMarkers) {
                     BreachMarkerContent(breach)
                 }
+                val wizardState = viewModel.wizardState
                 viewModel.wizardPreview?.let { preview ->
-                    GeofenceMapContent(geofence = preview)
+                    val isDraggable = wizardState is WizardState.PickLocation
+                            || wizardState is WizardState.PickRadius
+                    if (isDraggable) {
+                        DraggableWizardMarker(
+                            position = com.google.android.gms.maps.model.LatLng(
+                                preview.latitude, preview.longitude,
+                            ),
+                            radius = preview.radius,
+                            onDragEnd = { newPos ->
+                                viewModel.updateWizardLocation(newPos)
+                            },
+                        )
+                    } else {
+                        GeofenceMapContent(geofence = preview)
+                    }
                 }
             }
 
             FabColumn(
                 showLocationControls = hasLocationPermission,
                 isHighFrequency = viewModel.highFrequencyTracking,
+                isTracking = viewModel.isTracking,
                 onHighFrequencyToggle = viewModel::toggleHighFrequencyTracking,
+                onTrackingToggle = viewModel::toggleTracking,
                 onStyleClick = { showStylePicker = true },
                 onMyLocationClick = {
                     val latLng = viewModel.getLastKnownLatLng()
@@ -171,6 +190,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                         showBottomSheet = true
                     }
                 },
+                onSearchClick = { viewModel.openSearch() },
                 onNewReminderClick = {
                     viewModel.startWizard(cameraPositionState.position.target)
                 },
@@ -184,7 +204,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
             GeofenceWizardOverlay(
                 state = viewModel.wizardState,
                 onConfirmLocation = {
-                    viewModel.confirmLocation(cameraPositionState.position.target)
+                    val ws = viewModel.wizardState
+                    val target = if (ws is WizardState.PickLocation && ws.latLng != null) {
+                        ws.latLng
+                    } else {
+                        cameraPositionState.position.target
+                    }
+                    viewModel.confirmLocation(target)
                     scope.launch {
                         cameraPositionState.animate(CameraUpdateFactory.zoomTo(15f))
                     }
@@ -194,6 +220,23 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 onMessageChanged = { viewModel.updateMessage(it) },
                 onSubmit = { viewModel.submitGeofence() },
                 modifier = Modifier.align(Alignment.BottomCenter),
+            )
+
+            AddressSearchOverlay(
+                visible = viewModel.showSearch,
+                query = viewModel.searchQuery,
+                results = viewModel.searchResults,
+                onQueryChanged = { viewModel.updateSearchQuery(it) },
+                onResultSelected = { result ->
+                    viewModel.onSearchResultSelected(result)
+                    scope.launch {
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(result.latLng, 16f),
+                        )
+                    }
+                },
+                onDismiss = { viewModel.closeSearch() },
+                modifier = Modifier.align(Alignment.TopCenter),
             )
         }
     }

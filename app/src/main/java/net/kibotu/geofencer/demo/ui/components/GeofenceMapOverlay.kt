@@ -11,8 +11,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng as GmsLatLng
 import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.DragState
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberMarkerState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
@@ -60,6 +64,43 @@ fun BreachMarkerContent(breach: BreachMarker) {
         state = rememberUpdatedMarkerState(position = position),
         title = "${breach.transition}: $label",
         icon = icon,
+    )
+}
+
+@Composable
+fun DraggableWizardMarker(
+    position: GmsLatLng,
+    radius: Double,
+    onDragEnd: (GmsLatLng) -> Unit,
+) {
+    val context = LocalContext.current
+    val icon = rememberVectorIcon(context, R.drawable.ic_twotone_location_on_48px)
+    val markerState = rememberMarkerState(position = position)
+
+    LaunchedEffect(position) {
+        markerState.position = position
+    }
+
+    LaunchedEffect(markerState) {
+        snapshotFlow { markerState.dragState }
+            .collect { state ->
+                if (state == DragState.END) {
+                    onDragEnd(markerState.position)
+                }
+            }
+    }
+
+    Marker(
+        state = markerState,
+        icon = icon,
+        draggable = true,
+    )
+
+    Circle(
+        center = markerState.position,
+        radius = radius,
+        strokeColor = geofenceStroke,
+        fillColor = geofenceFill,
     )
 }
 
