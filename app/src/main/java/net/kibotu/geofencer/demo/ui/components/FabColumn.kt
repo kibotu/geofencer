@@ -30,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.kibotu.geofencer.demo.R
@@ -70,7 +72,7 @@ fun FabColumn(
         if (showLocationControls) {
             SmallFab(
                 onClick = onMyLocationClick,
-                contentDescription = stringResource(R.string.map_style),
+                contentDescription = "My location",
             ) {
                 Icon(Icons.Default.MyLocation, contentDescription = null)
             }
@@ -103,7 +105,7 @@ fun FabColumn(
 
             SmallFab(
                 onClick = onNewReminderClick,
-                contentDescription = null,
+                contentDescription = "Add geofence",
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
             }
@@ -143,7 +145,10 @@ private fun TrackingFab(
         onClick = onClick,
         modifier = modifier
             .padding(bottom = 6.dp)
-            .size(42.dp),
+            .size(42.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Toggle location tracking"
+            },
         containerColor = containerColor,
         contentColor = Color.White,
         shape = CircleShape,
@@ -170,7 +175,15 @@ private fun SmallFab(
         onClick = onClick,
         modifier = modifier
             .padding(bottom = 6.dp)
-            .size(36.dp),
+            .size(36.dp)
+            .then(
+                if (contentDescription != null) {
+                    val desc = contentDescription
+                    Modifier.semantics(mergeDescendants = true) {
+                        this.contentDescription = desc
+                    }
+                } else Modifier,
+            ),
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         content = content,

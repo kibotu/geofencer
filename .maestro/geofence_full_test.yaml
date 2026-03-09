@@ -1,0 +1,163 @@
+appId: net.kibotu.geofencer
+---
+
+# ──────────────────────────────────────────────
+# 1. Launch app
+# ──────────────────────────────────────────────
+- launchApp:
+    appId: net.kibotu.geofencer
+
+- extendedWaitUntil:
+    visible: "Google Map"
+    timeout: 15000
+
+# ──────────────────────────────────────────────
+# 2. Toggle recording off then on
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "Toggle location tracking"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Toggle location tracking"
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 3. Toggle battery / high-frequency tracking
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "High-frequency tracking"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "High-frequency tracking"
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 4. My location button
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "My location"
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 5. Map style picker — cycle through all styles
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "Map style"
+- assertVisible: "Choose map style"
+- tapOn: "Steampunk"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Map style"
+- tapOn: "Light"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Map style"
+- tapOn: "Dark 3D"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Map style"
+- tapOn: "Satellite"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Map style"
+- tapOn: "Pokemon GO"
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 6. Event log — open, verify, clear, close
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "Toggle event log"
+- waitForAnimationToEnd
+- assertVisible: "Live Events"
+
+- tapOn: "Clear"
+- waitForAnimationToEnd
+
+- back
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 7. Add geofence at current location
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "Add geofence"
+- waitForAnimationToEnd
+
+- assertVisible: "Where do you want to add a geofence?"
+- assertVisible: "Continue"
+
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+- assertVisible: "Choose the radius"
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+- assertVisible: "Enter the message"
+- tapOn:
+    text: "We arrived! :]"
+- inputText: "Current location geofence"
+- hideKeyboard
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 8. Search for Alexanderplatz & add geofence
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "Search address"
+- waitForAnimationToEnd
+
+- inputText: "Alexanderplatz Berlin"
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Alexanderpl.*"
+    timeout: 10000
+
+- tapOn:
+    text: "Alexanderpl.*"
+- waitForAnimationToEnd
+
+- assertVisible: "Where do you want to add a geofence?"
+
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+- assertVisible: "Choose the radius"
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+- assertVisible: "Enter the message"
+- tapOn:
+    text: "We arrived! :]"
+- inputText: "Alexanderplatz geofence"
+- hideKeyboard
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# ──────────────────────────────────────────────
+# 9. Final toggle recording & verify event log
+# ──────────────────────────────────────────────
+- tapOn:
+    text: "Toggle location tracking"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Toggle event log"
+- waitForAnimationToEnd
+- assertVisible: "Live Events"
+
+- back
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Toggle location tracking"
+- waitForAnimationToEnd

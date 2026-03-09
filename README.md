@@ -16,6 +16,7 @@ Convenience library to receive user location updates and geofence events with mi
   - [Location Tracking](#location-tracking)
 - [API Reference](#api-reference)
 - [Permissions](#permissions)
+- [Maestro UI Tests](#maestro-ui-tests)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -220,6 +221,52 @@ The library declares these permissions in its manifest (merged automatically):
 ```
 
 Your app must request `ACCESS_FINE_LOCATION` (and `ACCESS_BACKGROUND_LOCATION` on Android 10+) at runtime before adding geofences or starting location tracking.
+
+## Maestro UI Tests
+
+The demo app includes [Maestro](https://maestro.mobile.dev/) flows in the `.maestro/` directory.
+
+### Prerequisites
+
+1. Install Maestro:
+
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash
+```
+
+2. Connect an Android device or start an emulator.
+
+3. Install the debug build:
+
+```bash
+./gradlew :app:installDebug
+```
+
+### Running the tests
+
+Run all flows in the `.maestro/` directory:
+
+```bash
+maestro test .maestro/
+```
+
+Run a specific flow:
+
+```bash
+maestro test .maestro/geofence_full_test.yaml
+```
+
+### What the test covers
+
+| Area | Details |
+|------|---------|
+| Recording toggle | Toggles location tracking off and on |
+| Battery / Performance | Switches between high-frequency and battery-saving mode |
+| My location | Centers the map on the current position |
+| Map styles | Cycles through all 5 styles (Pokemon GO, Steampunk, Light, Dark 3D, Satellite) |
+| Event log | Opens the bottom sheet, verifies it shows, clears entries, closes |
+| Geofence at current location | Runs the full wizard (location → radius → message) |
+| Search + geofence | Searches for "Alexanderplatz Berlin", selects the result, completes the wizard |
 
 ## Contributing
 
