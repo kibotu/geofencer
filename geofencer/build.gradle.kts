@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.serialization)
-    `maven-publish`
+    alias(libs.plugins.vanniktech.maven.publish)
 }
 
 android {
@@ -45,13 +45,6 @@ android {
         ignoreWarnings = true
         quiet = true
     }
-
-    publishing {
-        singleVariant("release") {
-            withJavadocJar()
-            withSourcesJar()
-        }
-    }
 }
 
 java {
@@ -67,6 +60,13 @@ kotlin {
     }
 }
 
+mavenPublishing {
+    if (System.getenv("JITPACK") != "true") {
+        publishToMavenCentral()
+        signAllPublications()
+    }
+}
+
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
@@ -77,17 +77,4 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.startup.runtime)
     implementation(libs.timber)
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            register<MavenPublication>("release") {
-                from(components.findByName("release"))
-                groupId = "net.kibotu"
-                artifactId = "geofencer"
-                version = "3.0.0"
-            }
-        }
-    }
 }

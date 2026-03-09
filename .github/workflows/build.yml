@@ -1,9 +1,12 @@
-name: Android CI Build
+name: Android CI
 
 on:
+  push:
+    branches: [ "master" ]
+    tags: [ "*" ]
   pull_request:
-  # Refer link: https://github:blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/:
   workflow_dispatch:
+
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -14,29 +17,51 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Set up JDK
-        uses: actions/setup-java@v1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-#        TODO
-#      - name: Run Spotless
-#        run:
+      - name: Build with Gradle
+        run: ./gradlew build
 
-#        TODO
-#      - name: Run Lint
-#        run: ./gradlew app:lintDebug --stacktrace
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    env:
+      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USER_NAME }}
+      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_IN_MEMORY_KEY_ID }}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Build
-        run: ./gradlew app:assembleDebug
+      - name: Validate semver tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          if [[ ! $TAG_NAME =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Not a semver tag ($TAG_NAME). Skipping publish."
+            exit 1
+          fi
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Publish to Maven Central
+        run: ./gradlew publishAndReleaseToMavenCentral --stacktrace -Pversion=$GITHUB_REF_NAME

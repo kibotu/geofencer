@@ -1,214 +1,219 @@
-# Geofencer 
-[![Build Status](https://app.bitrise.io/app/62c5e7d6d14d57dd/status.svg?token=i0sTxq2L3WeD26_b77uA5A)](https://app.bitrise.io/app/62c5e7d6d14d57dd) [![](https://jitpack.io/v/kibotu/geofencer.svg)](https://jitpack.io/#kibotu/geofencer)
-[![](https://jitpack.io/v/exozet/geofencer/month.svg)](https://jitpack.io/#exozet/geofencer) [![Hits-of-Code](https://hitsofcode.com/github/exozet/geofencer)](https://hitsofcode.com/view/github/exozet/geofencer)
-[![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=15) [![Gradle Version](https://img.shields.io/badge/gradle-8.5-green.svg)](https://docs.gradle.org/current/release-notes) [![Kotlin](https://img.shields.io/badge/kotlin-1.9.21-green.svg)](https://kotlinlang.org/) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-geofencer-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/7860)
+# Geofencer
 
-Convenience library to receive user location updates and geofence events with minimal effort.
+[![Android CI](https://github.com/kibotu/geofencer/actions/workflows/build.yml/badge.svg)](https://github.com/kibotu/geofencer/actions/workflows/build.yml) [![Maven Central Version](https://img.shields.io/maven-central/v/net.kibotu/geofencer)](https://central.sonatype.com/artifact/net.kibotu/geofencer) [![](https://jitpack.io/v/kibotu/geofencer.svg)](https://jitpack.io/#kibotu/geofencer) [![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=23) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-### Features
+Convenience library to receive user location updates and geofence events with minimal effort. Survives app kills and device reboots.
 
-- supports Android 14
-- receive updates on background
-- receive updates if app got killed
-- geofence updates (dwell, enter, exit)
-- location updates
-- configurable update intervals
+---
 
-![sample.gif](sample.gif)
-     
-### Requirements
+## Table of Contents
 
-1. Location permissions in [*AndroidManifest.xml*](app/src/main/AndroidManifest.xml#L5-L9)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Geofencing](#geofencing)
+  - [Location Tracking](#location-tracking)
+- [API Reference](#api-reference)
+- [Permissions](#permissions)
+- [Publishing](#publishing)
+- [Contributing](#contributing)
+- [License](#license)
 
-	    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-   	 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-   	 	<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-   	 	
-2. Google maps api key
+---
 
-		<string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">YOUR_KEY</string>
-	
-### How to use
+## Features
 
-### Geofence
+- Kotlin-first API with DSL builders and coroutines
+- Geofence transitions: enter, exit, dwell
+- Continuous location updates via `SharedFlow`
+- Survives app kill and device reboot (via WorkManager)
+- Auto-initializes with AndroidX Startup
+- Configurable update intervals, displacement, and priority
+- Custom actions for geofence and location events
+- minSdk 23, targets Android 15+
 
-1. Create [Receiver](app/src/main/java/com/sprotte/geofencer/demo/kotlin/NotificationWorker.kt)
+## Installation
+
+### Maven Central
 
 ```kotlin
-class NotificationWorker : GeoFenceUpdateModule() {
-	
-    override fun onGeofence(geofence: Geofence) {
-    	Timber.v(, "onGeofence $geofence")
+implementation("net.kibotu:geofencer:3.0.0")
+```
+
+### JitPack
+
+Add the JitPack repository to your `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        maven { url = uri("https://jitpack.io") }
     }
 }
 ```
 
-2. [Start geofence tracking](app/src/main/java/com/sprotte/geofencer/demo/kotlin/MainActivity.kt#L30-L39)
+Then add the dependency:
 
 ```kotlin
-val geofence = Geofence(
-    id = UUID.randomUUID().toString(),
-    latitude = 51.0899232,
-    longitude = 5.968358,
-    radius = 30.0,
-    title = "Germany",
-    message = "Entered Germany",
-    transitionType = GEOFENCE_TRANSITION_ENTER
-)
-    
-Geofencer(this).addGeofenceWorker(geofence, NotificationWorker::class.java) { /* successfully added geofence */ }
+implementation("com.github.kibotu:geofencer:latest")
 ```
-### Location Tracker
-TODO: replace with worker
-1. Create [Receiver](app/src/main/java/com/sprotte/geofencer/demo/kotlin/LocationTrackerWorker.kt)
+
+## Quick Start
+
+### Geofencing
+
+#### 1. Add a geofence
 
 ```kotlin
-class LocationTrackerWorker : LocationTrackerUpdateModule() {
-
-	override fun onLocationResult(locationResult: LocationResult) {  
-		Log.v(GeoFenceIntentService::class.java.simpleName, "onLocationResult $location")
-  }
+Geofencer.add {
+    latitude = 52.520008
+    longitude = 13.404954
+    radius = 200.0
+    label = "Berlin"
+    message = "Welcome to Berlin!"
+    transitions = setOf(Geofence.Transition.Enter, Geofence.Transition.Exit)
+    action<NotificationAction>()
 }
 ```
 
-2. [Start tracking](app/src/main/java/com/sprotte/geofencer/demo/kotlin/MainActivity.kt#L44-L45)
+#### 2. Observe events
 
 ```kotlin
-LocationTracker.requestLocationUpdates(this, LocationTrackerWorker::class.java)
-```
-
-4. Stop tracking
-
-```kotlin
-LocationTracker.removeLocationUpdates(requireContext())
-```
-
-### How to use in Java
-
-### Geofence
-
-1. Create [Receiver](app/src/main/java/com/sprotte/geofencer/demo/java/NotificationWorker.java)
-
-```java
-public class NotificationWorker extends GeoFenceUpdateModule {
-	
-	@Override
-	public void onGeofence(@NotNull Geofence geofence) {
-    	Timber.d("onGeofence " + geofence);
-   	}
-}
-```
-
-2. [Start geofence tracking](app/src/main/java/com/sprotte/geofencer/demo/java/AddGeoFenceActivity.java#L47-L56)
-
-```java
-Geofence geofence = new Geofence(
-        UUID.randomUUID().toString(),
-        51.0899232,
-        5.968358,
-        30.0,
-        "Germany",
-        "Entered Germany",
-        GEOFENCE_TRANSITION_ENTER);
-Geofencer geofencer = new Geofencer(this);
-geofencer.addGeofenceWorker(geofence, NotificationWorker.class,
-   	 () -> /* successfully added geofence */ Unit.INSTANCE);        	 
-```
-### Location Tracker
-
-1. Create [Receiver](app/src/main/java/com/sprotte/geofencer/demo/java/LocationTrackerWorker.java)
-
-```java
-public class LocationTrackerWorker extends LocationTrackerUpdateModule {
-
-    @Override
-    public void onLocationResult(@NotNull LocationResult location) {
-	
-        Log.v(GeoFenceIntentService.class.getSimpleName(), "onLocationResult " + location);		        );
+lifecycleScope.launch {
+    Geofencer.events.collect { event ->
+        Log.d("Geofence", "${event.transition.name} ${event.geofence.label}")
     }
 }
 ```
 
-2. [Start tracking](https://github.com/exozet/geofencer/blob/master/app/src/main/java/com/sprotte/geofencer/demo/java/AddGeoFenceActivity.java#L65-L68)
+#### 3. Create a custom action
 
-```java
-LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerWorker.class);
+Actions run even when the app is killed:
+
+```kotlin
+class NotificationAction : GeofenceAction() {
+    override fun onTriggered(context: Context, event: GeofenceEvent) {
+        // send notification, log analytics, etc.
+    }
+}
 ```
 
-4. Stop tracking
+#### 4. Manage geofences
 
-```java
-LocationTracker.INSTANCE.removeLocationUpdates(this);
+```kotlin
+// list all active geofences
+val all: List<Geofence> = Geofencer.geofences.value
+
+// observe changes
+Geofencer.geofences.collect { list -> /* update UI */ }
+
+// look up by id
+val fence: Geofence? = Geofencer["some-id"]
+
+// remove
+Geofencer.remove("some-id")
+Geofencer.removeAll()
 ```
 
-### How to install
+### Location Tracking
 
-#### jCenter / mavenCentral
+#### 1. Start tracking
 
-	implementation 'net.kibotu:geofencer:latest'
-
-#### or Jiptack
-
-##### Step 1. Add the JitPack repository to your build file
-
-Add it in your root build.gradle at the end of repositories:
-
-	allprojects {
-		repositories {
-			maven { url 'https://jitpack.io' }
-		}
-	}
-##### Step 2. Add the dependency
-
-	dependencies {
-		implementation 'net.kibotu:geofencer:latest'
-		implementation 'com.google.android.gms:play-services-location:17.0.0'
-	}
-
-### Configuration
-
-Default Location tracking update intervals can be overriden, by adding following parameter into your _app/res/_ - folder, e.g. [**app/res/config.xml**](app/src/main/res/values/config.xml#L4-L7)
-
-``` xml
-    <!-- Location Tracker -->
-    <integer name="location_update_interval_in_millis">0</integer>
-    <integer name="location_fastest_update_interval_in_millis">0</integer>
-    <integer name="location_max_wait_time_interval_in_millis">0</integer>
-    <integer name="location_min_distance_for_updates_in_meters">0</integer>
-
-    <!-- Geofencer -->
-    <integer name="loitering_delay">1</integer>
-    <integer name="notification_responsiveness">1</integer>
-    <integer name="expiration_duration">-1</integer> // -1 == NEVER_EXPIRE
+```kotlin
+LocationTracker.start(context) {
+    interval = 10.seconds
+    fastest = 5.seconds
+    displacement = 50f
+    action<LocationLogAction>()
+}
 ```
 
-You can also set this values at runtime in some step before call method `requestLocationUpdates`
+#### 2. Observe locations
 
-``` java
-    int interval = 1000;
-    int fastestInterval = 2000;
-    int priority = LocationRequest.PRIORITY_HIGH_ACCURACY;
-    int maxWaitTime = 10000;
-    int smallestDisplacement = 20;
-
-    LocationTrackerParams locationTrackerParams = new LocationTrackerParams(
-            interval, fastestInterval, priority, maxWaitTime, smallestDisplacement);
-
-    LocationTracker.INSTANCE.requestLocationUpdates(this, LocationTrackerService.class, locationTrackerParams);
+```kotlin
+lifecycleScope.launch {
+    LocationTracker.locations.collect { location ->
+        Log.d("Location", "${location.latitude}, ${location.longitude}")
+    }
+}
 ```
-> LocationTrackerParams is a open class for kotlin or a not final class for java, so if you don't need to setup all params you can extend it.
 
-### Known Issues
+#### 3. Create a custom action
 
-- does not work when in doze mode [#2](https://github.com/exozet/geofencer/issues/2)
+```kotlin
+class LocationLogAction : LocationAction() {
+    override fun onUpdate(context: Context, result: LocationResult) {
+        // persist, upload, etc.
+    }
+}
+```
 
+#### 4. Stop tracking
 
-### Contributors
+```kotlin
+LocationTracker.stop(context)
+```
 
-[Jan Rabe](jan.rabe@exozet.com)
+## API Reference
 
-[Paul Sprotte](paul.sprotte@exozet.com)
+| Class | Description |
+|---|---|
+| `Geofencer` | Singleton to add/remove geofences and observe events via `SharedFlow` |
+| `Geofence` | Data class holding coordinates, radius, transitions, and metadata |
+| `GeofenceBuilder` | DSL builder for `Geofence` instances |
+| `GeofenceEvent` | Emitted event containing the geofence, transition type, and triggering location |
+| `GeofenceAction` | Abstract class for custom geofence event handlers (survives app kill) |
+| `LocationTracker` | Singleton to start/stop location updates and observe via `SharedFlow` |
+| `LocationConfig` | DSL builder for location request parameters |
+| `LocationAction` | Abstract class for custom location update handlers (survives app kill) |
 
-[AgnaldoNP] (https://github.com/AgnaldoNP)
+## Permissions
 
-[Mohammed Khalid Hamid](https://github.com/khalid64927)
+The library declares these permissions in its manifest (merged automatically):
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+```
+
+Your app must request `ACCESS_FINE_LOCATION` (and `ACCESS_BACKGROUND_LOCATION` on Android 10+) at runtime before adding geofences or starting location tracking.
+
+## Publishing
+
+### Maven Central (CI)
+
+Pushing a semver tag (e.g. `3.0.0`) triggers the GitHub Actions workflow to publish to Maven Central. Required repository secrets:
+
+| Secret | Description |
+|---|---|
+| `MAVEN_CENTRAL_USER_NAME` | Sonatype OSSRH username |
+| `MAVEN_CENTRAL_PASSWORD` | Sonatype OSSRH password / token |
+| `SIGNING_IN_MEMORY_KEY` | GPG private key (ASCII-armored) |
+| `SIGNING_IN_MEMORY_KEY_ID` | GPG key ID (last 8 hex chars) |
+| `SIGNING_IN_MEMORY_KEY_PASSWORD` | GPG key passphrase |
+
+### JitPack
+
+JitPack builds are automatic. Use `com.github.kibotu:geofencer:<tag>` as the coordinate. The `jitpack.yml` at the project root controls the build.
+
+### Local
+
+```bash
+./gradlew :geofencer:publishToMavenLocal
+```
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## License
+
+```
+MIT License
+
+Copyright (c) 2023 Geofencer Developers
+```
+
+See [LICENSE](LICENSE) for the full text.
