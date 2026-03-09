@@ -3,13 +3,16 @@ package net.kibotu.geofencer.demo.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -34,6 +37,7 @@ fun GeofenceWizardOverlay(
     onConfirmRadius: () -> Unit,
     onMessageChanged: (String) -> Unit,
     onSubmit: () -> Unit,
+    onCancel: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -55,16 +59,21 @@ fun GeofenceWizardOverlay(
                     .padding(16.dp),
             ) {
                 when (state) {
-                    is WizardState.PickLocation -> LocationStep(onConfirm = onConfirmLocation)
+                    is WizardState.PickLocation -> LocationStep(
+                        onConfirm = onConfirmLocation,
+                        onCancel = onCancel,
+                    )
                     is WizardState.PickRadius -> RadiusStep(
                         radius = state.radius,
                         onRadiusChanged = onRadiusChanged,
                         onConfirm = onConfirmRadius,
+                        onCancel = onCancel,
                     )
                     is WizardState.PickMessage -> MessageStep(
                         message = state.message,
                         onMessageChanged = onMessageChanged,
                         onSubmit = onSubmit,
+                        onCancel = onCancel,
                     )
                     WizardState.Hidden -> {}
                 }
@@ -74,7 +83,7 @@ fun GeofenceWizardOverlay(
 }
 
 @Composable
-private fun LocationStep(onConfirm: () -> Unit) {
+private fun LocationStep(onConfirm: () -> Unit, onCancel: () -> Unit) {
     Text(
         text = stringResource(R.string.instruction_where_description),
         style = MaterialTheme.typography.titleMedium,
@@ -84,7 +93,7 @@ private fun LocationStep(onConfirm: () -> Unit) {
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
     )
-    ContinueButton(onClick = onConfirm)
+    ButtonRow(onConfirm = onConfirm, onCancel = onCancel)
 }
 
 @Composable
@@ -92,6 +101,7 @@ private fun RadiusStep(
     radius: Double,
     onRadiusChanged: (Double) -> Unit,
     onConfirm: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     Text(
         text = stringResource(R.string.instruction_radius_description),
@@ -114,7 +124,7 @@ private fun RadiusStep(
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(bottom = 16.dp),
     )
-    ContinueButton(onClick = onConfirm)
+    ButtonRow(onConfirm = onConfirm, onCancel = onCancel)
 }
 
 @Composable
@@ -122,6 +132,7 @@ private fun MessageStep(
     message: String,
     onMessageChanged: (String) -> Unit,
     onSubmit: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     Text(
         text = stringResource(R.string.instruction_message_description),
@@ -146,21 +157,35 @@ private fun MessageStep(
             .fillMaxWidth()
             .padding(vertical = 8.dp),
     )
-    ContinueButton(onClick = {
-        if (message.isBlank()) {
-            showError = true
-        } else {
-            onSubmit()
-        }
-    })
+    ButtonRow(
+        onConfirm = {
+            if (message.isBlank()) {
+                showError = true
+            } else {
+                onSubmit()
+            }
+        },
+        onCancel = onCancel,
+    )
 }
 
 @Composable
-private fun ContinueButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
+private fun ButtonRow(onConfirm: () -> Unit, onCancel: () -> Unit) {
+    Row(
         modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(R.string.continue_description))
+        OutlinedButton(
+            onClick = onCancel,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(stringResource(R.string.cancel_wizard))
+        }
+        Button(
+            onClick = onConfirm,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(stringResource(R.string.continue_description))
+        }
     }
 }

@@ -2,6 +2,7 @@ package net.kibotu.geofencer.demo.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -219,6 +220,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 onConfirmRadius = { viewModel.confirmRadius() },
                 onMessageChanged = { viewModel.updateMessage(it) },
                 onSubmit = { viewModel.submitGeofence() },
+                onCancel = { viewModel.cancelWizard() },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
 
@@ -239,6 +241,14 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 modifier = Modifier.align(Alignment.TopCenter),
             )
         }
+    }
+
+    BackHandler(enabled = viewModel.showSearch) {
+        viewModel.closeSearch()
+    }
+
+    BackHandler(enabled = viewModel.wizardState !is WizardState.Hidden) {
+        viewModel.cancelWizard()
     }
 
     if (showBottomSheet) {

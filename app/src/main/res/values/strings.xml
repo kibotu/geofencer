@@ -34,6 +34,7 @@
     <string name="high_frequency_tracking">High-frequency tracking</string>
     <string name="toggle_tracking">Toggle location tracking</string>
 
+    <string name="cancel_wizard">Cancel</string>
     <string name="search_street">Search address</string>
     <string name="search_hint">Search street or address…</string>
     <string name="search_no_results">No results found</string>

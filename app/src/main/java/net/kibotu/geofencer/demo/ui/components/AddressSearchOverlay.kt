@@ -12,10 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -33,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -65,17 +67,25 @@ fun AddressSearchOverlay(
 
         Surface(
             modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .windowInsetsPadding(WindowInsets.ime),
+                .windowInsetsPadding(WindowInsets.ime)
+                .clip(RoundedCornerShape(28.dp)),
             tonalElevation = 6.dp,
-            shadowElevation = 8.dp,
+            shadowElevation = 6.dp,
+            shape = RoundedCornerShape(28.dp),
         ) {
             Column {
                 TextField(
                     value = query,
                     onValueChange = onQueryChanged,
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.search_hint),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    },
                     leadingIcon = {
                         IconButton(onClick = onDismiss) {
                             Icon(
@@ -92,6 +102,7 @@ fun AddressSearchOverlay(
                         }
                     },
                     singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -103,7 +114,9 @@ fun AddressSearchOverlay(
                         .focusRequester(focusRequester),
                 )
 
-                HorizontalDivider()
+                if (results.isNotEmpty() || query.length >= 3) {
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                }
 
                 if (results.isEmpty() && query.length >= 3) {
                     Text(
@@ -117,12 +130,17 @@ fun AddressSearchOverlay(
                 LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                     items(results, key = { it.hashCode() }) { result ->
                         ListItem(
-                            headlineContent = { Text(result.addressLine) },
+                            headlineContent = {
+                                Text(
+                                    result.addressLine,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            },
                             leadingContent = {
                                 Icon(
                                     Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             },
                             modifier = Modifier.clickable { onResultSelected(result) },
