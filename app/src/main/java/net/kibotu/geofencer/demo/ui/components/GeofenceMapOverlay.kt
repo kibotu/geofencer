@@ -18,7 +18,7 @@ import com.google.maps.android.compose.rememberMarkerState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import net.kibotu.geofencer.demo.R
 import net.kibotu.geofencer.demo.kotlin.BreachMarker
-import net.kibotu.geofencer.geofencer.models.Geofence
+import net.kibotu.geofencer.Geofence
 
 private val geofenceStroke = Color(0xFF2594E4)
 private val geofenceFill = Color(0x4008AB91)

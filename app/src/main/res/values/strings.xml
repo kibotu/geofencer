@@ -31,4 +31,5 @@
     <string name="toggle_event_log">Toggle event log</string>
     <string name="map_style">Map style</string>
     <string name="map_style_picker_title">Choose map style</string>
+    <string name="high_frequency_tracking">High-frequency tracking</string>
 </resources>

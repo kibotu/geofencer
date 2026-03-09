@@ -74,12 +74,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.play.services.location)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.preference.ktx)
     implementation(libs.work.runtime.ktx)
+    implementation(libs.startup.runtime)
     implementation(libs.timber)
-    implementation(libs.appcompat)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.activity.ktx)
 }
 
 afterEvaluate {

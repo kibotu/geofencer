@@ -1,30 +1,31 @@
-package net.kibotu.geofencer.geofencer.service
+package net.kibotu.geofencer.internal
 
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import net.kibotu.geofencer.geofencer.GeofenceAction
-import net.kibotu.geofencer.geofencer.GeofenceEvent
-import net.kibotu.geofencer.geofencer.Geofencer
-import net.kibotu.geofencer.geofencer.models.Geofence
+import net.kibotu.geofencer.Geofence
+import net.kibotu.geofencer.GeofenceAction
+import net.kibotu.geofencer.GeofenceEvent
+import net.kibotu.geofencer.Geofencer
+import net.kibotu.geofencer.LatLng
 import timber.log.Timber
 
-internal class GeoFenceUpdateWorker(
+internal class GeofenceActionWorker(
     private val ctx: Context,
     params: WorkerParameters,
 ) : Worker(ctx, params) {
 
     override fun doWork(): Result {
         return try {
-            val id = inputData.getString(Geofencer.INTENT_EXTRAS_KEY) ?: return Result.failure()
+            val id = inputData.getString(Extras.GEOFENCE_ID) ?: return Result.failure()
             val geofence = Geofencer.getRepository(ctx).get(id) ?: return Result.failure()
-            val transitionType = inputData.getInt(Geofencer.EXTRA_TRANSITION_TYPE, -1)
-            val trigLat = inputData.getDouble(Geofencer.EXTRA_TRIGGERING_LAT, Double.NaN)
-            val trigLng = inputData.getDouble(Geofencer.EXTRA_TRIGGERING_LNG, Double.NaN)
+            val transitionType = inputData.getInt(Extras.TRANSITION_TYPE, -1)
+            val trigLat = inputData.getDouble(Extras.TRIGGERING_LAT, Double.NaN)
+            val trigLng = inputData.getDouble(Extras.TRIGGERING_LNG, Double.NaN)
             dispatch(geofence, transitionType, trigLat, trigLng)
             Result.success()
         } catch (e: Exception) {
-            Timber.e(e, "GeoFenceUpdateWorker failed")
+            Timber.e(e, "GeofenceActionWorker failed")
             Result.failure()
         }
     }
@@ -43,14 +44,16 @@ internal class GeoFenceUpdateWorker(
             if (!GeofenceAction::class.java.isAssignableFrom(clazz)) return
 
             val action = clazz.getDeclaredConstructor().newInstance() as GeofenceAction
-            val transition = Geofence.Transition.of(transitionType)
-                ?: Geofence.Transition.of(geofence.transitions)
-                ?: Geofence.Transition.Enter
+            val transition = Geofence.Transition.of(transitionType) ?: Geofence.Transition.Enter
+            val location = if (!triggeringLatitude.isNaN() && !triggeringLongitude.isNaN()) {
+                LatLng(triggeringLatitude, triggeringLongitude)
+            } else {
+                null
+            }
             val event = GeofenceEvent(
                 geofence = geofence,
                 transition = transition,
-                triggeringLatitude = triggeringLatitude,
-                triggeringLongitude = triggeringLongitude,
+                triggeringLocation = location,
             )
             action.onTriggered(applicationContext, event)
         } catch (e: Exception) {

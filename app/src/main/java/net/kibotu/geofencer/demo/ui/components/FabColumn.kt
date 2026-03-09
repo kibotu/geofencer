@@ -5,13 +5,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -20,13 +23,15 @@ import net.kibotu.geofencer.demo.R
 @Composable
 fun FabColumn(
     showLocationControls: Boolean,
+    isHighFrequency: Boolean,
+    onHighFrequencyToggle: () -> Unit,
     onStyleClick: () -> Unit,
     onMyLocationClick: () -> Unit,
     onToggleLogClick: () -> Unit,
     onNewReminderClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         SmallFab(
             onClick = onStyleClick,
             contentDescription = stringResource(R.string.map_style),
@@ -40,6 +45,16 @@ fun FabColumn(
                 contentDescription = stringResource(R.string.map_style),
             ) {
                 Icon(Icons.Default.MyLocation, contentDescription = null)
+            }
+
+            SmallFab(
+                onClick = onHighFrequencyToggle,
+                contentDescription = stringResource(R.string.high_frequency_tracking),
+            ) {
+                Icon(
+                    imageVector = if (isHighFrequency) Icons.Default.Speed else Icons.Default.BatterySaver,
+                    contentDescription = null,
+                )
             }
         }
 

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.android.gms.location.LocationResult
-import net.kibotu.geofencer.tracking.LocationAction
+import net.kibotu.geofencer.LocationAction
 import timber.log.Timber
 
 class LocationLogAction : LocationAction() {
