@@ -1,12 +1,11 @@
-package net.kibotu.geofencer.tracking
+package net.kibotu.geofencer
 
 import com.google.android.gms.location.Priority
-import net.kibotu.geofencer.geofencer.GeofencerDsl
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @GeofencerDsl
-class LocationSpec {
+class LocationConfig {
     var interval: Duration = 10.seconds
     var fastest: Duration = 5.seconds
     var maxDelay: Duration = 30.seconds

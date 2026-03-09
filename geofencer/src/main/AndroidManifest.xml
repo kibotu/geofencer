@@ -9,14 +9,14 @@
     <application>
 
         <receiver
-            android:name="net.kibotu.geofencer.geofencer.service.GeofenceBroadcastReceiver"
+            android:name="net.kibotu.geofencer.internal.GeofenceReceiver"
             android:enabled="true"
             android:exported="false" />
 
         <receiver
-            android:name="net.kibotu.geofencer.geofencer.service.GeofenceBootReceiver"
+            android:name="net.kibotu.geofencer.internal.BootReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -26,12 +26,21 @@
         </receiver>
 
         <receiver
-            android:name=".tracking.service.LocationTrackerUpdateBroadcastReceiver"
+            android:name="net.kibotu.geofencer.internal.LocationReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="net.kibotu.geofencer.tracking.service.ACTION_PROCESS_UPDATES" />
+                <action android:name="net.kibotu.geofencer.internal.ACTION_PROCESS_UPDATES" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false">
+            <meta-data
+                android:name="net.kibotu.geofencer.internal.GeofencerInitializer"
+                android:value="androidx.startup" />
+        </provider>
 
     </application>
 

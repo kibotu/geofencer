@@ -2,8 +2,8 @@ package net.kibotu.geofencer.demo.kotlin
 
 import android.content.Context
 import net.kibotu.geofencer.demo.misc.sendNotification
-import net.kibotu.geofencer.geofencer.GeofenceAction
-import net.kibotu.geofencer.geofencer.GeofenceEvent
+import net.kibotu.geofencer.GeofenceAction
+import net.kibotu.geofencer.GeofenceEvent
 import timber.log.Timber
 
 class NotificationAction : GeofenceAction() {
@@ -17,10 +17,11 @@ class NotificationAction : GeofenceAction() {
             "Geofence $transitionLabel"
         }
 
-        if (event.hasTriggeringLocation) {
+        val location = event.triggeringLocation
+        if (location != null) {
             val marker = BreachMarker(
-                latitude = event.triggeringLatitude,
-                longitude = event.triggeringLongitude,
+                latitude = location.latitude,
+                longitude = location.longitude,
                 geofenceId = event.geofence.id,
                 geofenceLabel = event.geofence.label,
                 transition = event.transition.name,

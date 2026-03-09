@@ -1,7 +1,6 @@
 [versions]
 activityKtx = "1.10.1"
 agp = "9.1.0"
-appcompat = "1.7.0"
 composeBom = "2026.02.01"
 coreKtx = "1.17.0"
 desugar_jdk_libs = "2.1.5"
@@ -12,6 +11,7 @@ lifecycleRuntimeKtx = "2.10.0"
 mapsCompose = "8.2.0"
 playServicesLocation = "21.3.0"
 preferenceKtx = "1.2.1"
+startupRuntime = "1.2.0"
 timber = "5.0.1"
 workManager = "2.10.0"
 
@@ -19,7 +19,6 @@ workManager = "2.10.0"
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityKtx" }
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -38,6 +37,7 @@ maps-compose = { group = "com.google.maps.android", name = "maps-compose", versi
 maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "mapsCompose" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
+startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "startupRuntime" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 

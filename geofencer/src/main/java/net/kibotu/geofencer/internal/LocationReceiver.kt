@@ -1,19 +1,15 @@
-package net.kibotu.geofencer.tracking.service
+package net.kibotu.geofencer.internal
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.google.android.gms.location.LocationResult
-import net.kibotu.geofencer.tracking.LocationTracker
-import net.kibotu.geofencer.utils.enqueueOneTimeLocationUpdateWorkRequest
-import net.kibotu.geofencer.utils.getSharedPrefs
+import net.kibotu.geofencer.LocationTracker
 import timber.log.Timber
 
-class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
+class LocationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
-        Timber.d("onReceive $intent")
-
         if (intent == null) return
         if (ACTION_PROCESS_UPDATES != intent.action) return
 
@@ -24,18 +20,18 @@ class LocationTrackerUpdateBroadcastReceiver : BroadcastReceiver() {
             return
         }
 
-        Timber.d("result = $result")
+        result.lastLocation?.let { LocationTracker.mutableLocations.tryEmit(it) }
+        LocationTracker.mutableRawResults.tryEmit(result)
 
-        LocationTracker.mutableLocations.tryEmit(result)
-
-        val actionClass = context.getSharedPrefs().getString(LocationTracker.PREFS_NAME, "")
+        val actionClass = context.getSharedPreferences(Prefs.LOCATION_PREFS, Context.MODE_PRIVATE)
+            .getString(Prefs.LOCATION_ACTION_KEY, "")
         if (actionClass.isNullOrEmpty()) return
 
-        enqueueOneTimeLocationUpdateWorkRequest(context, actionClass, intent.toUri(0))
+        Workers.enqueueLocationAction(context, actionClass, intent.toUri(0))
     }
 
     companion object {
         internal const val ACTION_PROCESS_UPDATES =
-            "net.kibotu.geofencer.tracking.service.ACTION_PROCESS_UPDATES"
+            "net.kibotu.geofencer.internal.ACTION_PROCESS_UPDATES"
     }
 }

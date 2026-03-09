@@ -12,17 +12,19 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
+import com.google.android.gms.location.Priority
+import net.kibotu.geofencer.Geofence
+import net.kibotu.geofencer.Geofence.Transition
+import net.kibotu.geofencer.Geofencer
+import net.kibotu.geofencer.LocationTracker
 import net.kibotu.geofencer.demo.kotlin.BreachMarker
 import net.kibotu.geofencer.demo.kotlin.BreachMarkerRepository
 import net.kibotu.geofencer.demo.kotlin.LocationLogAction
 import net.kibotu.geofencer.demo.kotlin.LogEntry
 import net.kibotu.geofencer.demo.kotlin.MapStyle
 import net.kibotu.geofencer.demo.kotlin.NotificationAction
-import net.kibotu.geofencer.geofencer.Geofencer
-import net.kibotu.geofencer.geofencer.models.Geofence
-import net.kibotu.geofencer.geofencer.models.Geofence.Transition
-import net.kibotu.geofencer.tracking.LocationTracker
 import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
 sealed interface WizardState {
     data object Hidden : WizardState
@@ -35,6 +37,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     private val prefs = application.getSharedPreferences("geofencer_prefs", Context.MODE_PRIVATE)
 
+    var highFrequencyTracking by mutableStateOf(prefs.getBoolean(KEY_HIGH_FREQUENCY, false))
+        private set
+
     var currentMapStyle by mutableStateOf(loadSavedStyle())
         private set
 
@@ -44,7 +49,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val _logEntries = mutableStateListOf<LogEntry>()
     val logEntries: List<LogEntry> = _logEntries
 
-    var geofences by mutableStateOf(Geofencer.all)
+    var geofences by mutableStateOf<List<Geofence>>(emptyList())
         private set
 
     var breachMarkers by mutableStateOf(BreachMarkerRepository.getAll(application))
@@ -75,8 +80,18 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
 
     init {
+        collectGeofences()
         collectGeofenceEvents()
         collectLocationUpdates()
+    }
+
+    private fun collectGeofences() {
+        viewModelScope.launch {
+            Geofencer.geofences.collect { list ->
+                geofences = list
+                breachMarkers = BreachMarkerRepository.getAll(getApplication())
+            }
+        }
     }
 
     private fun collectGeofenceEvents() {
@@ -84,25 +99,26 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             Geofencer.events.collect { event ->
                 _logEntries.add(0, LogEntry.Fence(event))
                 trimLog()
-                if (event.hasTriggeringLocation) {
+                val location = event.triggeringLocation
+                if (location != null) {
                     val marker = BreachMarker(
-                        latitude = event.triggeringLatitude,
-                        longitude = event.triggeringLongitude,
+                        latitude = location.latitude,
+                        longitude = location.longitude,
                         geofenceId = event.geofence.id,
                         geofenceLabel = event.geofence.label,
                         transition = event.transition.name,
                     )
                     BreachMarkerRepository.add(getApplication(), marker)
+                    breachMarkers = BreachMarkerRepository.getAll(getApplication())
                 }
-                refreshMapData()
             }
         }
     }
 
     private fun collectLocationUpdates() {
         viewModelScope.launch {
-            LocationTracker.locations.collect { result ->
-                _logEntries.add(0, LogEntry.Location(result))
+            LocationTracker.locations.collect { location ->
+                _logEntries.add(0, LogEntry.LocationUpdate(location))
                 trimLog()
             }
         }
@@ -120,12 +136,34 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onPermissionsGranted() {
         permissionsGranted = true
+        startLocationTracking()
+    }
+
+    fun toggleHighFrequencyTracking() {
+        highFrequencyTracking = !highFrequencyTracking
+        prefs.edit().putBoolean(KEY_HIGH_FREQUENCY, highFrequencyTracking).apply()
+        if (permissionsGranted) startLocationTracking()
+    }
+
+    private fun startLocationTracking() {
         val context = getApplication<Application>()
         LocationTracker.stop(context)
         LocationTracker.start(context) {
             action<LocationLogAction>()
-        }
-        refreshMapData()
+            if (highFrequencyTracking) {
+                interval = 5.seconds
+                fastest = 2.seconds
+                maxDelay = 10.seconds
+                displacement = 0f
+                priority = Priority.PRIORITY_HIGH_ACCURACY
+            } else {
+                interval = 60.seconds
+                fastest = 30.seconds
+                maxDelay = 120.seconds
+                displacement = 50f
+                priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            }
+        }.onFailure { Timber.e(it, "Failed to start location updates") }
     }
 
     fun getLastKnownLatLng(): LatLng? {
@@ -195,19 +233,17 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         val state = wizardState as? WizardState.PickMessage ?: return
         if (state.message.isBlank()) return
         viewModelScope.launch {
-            try {
-                Geofencer.add {
-                    latitude = state.latLng.latitude
-                    longitude = state.latLng.longitude
-                    radius = state.radius
-                    message = state.message
-                    transitions = Transition.Enter + Transition.Exit
-                    action<NotificationAction>()
-                }
+            Geofencer.add {
+                latitude = state.latLng.latitude
+                longitude = state.latLng.longitude
+                radius = state.radius
+                message = state.message
+                transitions = setOf(Transition.Enter, Transition.Exit)
+                action<NotificationAction>()
+            }.onSuccess {
                 wizardState = WizardState.Hidden
-                refreshMapData()
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to add geofence")
+            }.onFailure {
+                Timber.e(it, "Failed to add geofence")
             }
         }
     }
@@ -228,21 +264,13 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         val geofence = markerToRemove ?: return
         markerToRemove = null
         viewModelScope.launch {
-            try {
-                Geofencer.remove(geofence.id)
-                refreshMapData()
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to remove geofence")
-            }
+            Geofencer.remove(geofence.id)
+                .onFailure { Timber.e(it, "Failed to remove geofence") }
         }
-    }
-
-    private fun refreshMapData() {
-        geofences = Geofencer.all
-        breachMarkers = BreachMarkerRepository.getAll(getApplication())
     }
 
     companion object {
         private const val MAX_LOG_ENTRIES = 200
+        private const val KEY_HIGH_FREQUENCY = "high_frequency_tracking"
     }
 }

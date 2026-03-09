@@ -1,8 +1,8 @@
 package net.kibotu.geofencer.demo.kotlin
 
-import com.google.android.gms.location.LocationResult
-import net.kibotu.geofencer.geofencer.GeofenceEvent
-import net.kibotu.geofencer.geofencer.models.Geofence
+import android.location.Location
+import net.kibotu.geofencer.Geofence
+import net.kibotu.geofencer.GeofenceEvent
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -16,24 +16,18 @@ sealed class LogEntry(val timestamp: Instant) {
     abstract val title: String
     abstract val detail: String
 
-    class Location(
-        val result: LocationResult,
+    class LocationUpdate(
+        val location: Location,
         ts: Instant = Instant.now(),
     ) : LogEntry(ts) {
 
         override val icon: String = "\uD83D\uDCCD"
 
         override val title: String
-            get() {
-                val loc = result.lastLocation ?: return "—"
-                return "%.6f, %.6f".format(loc.latitude, loc.longitude)
-            }
+            get() = "%.6f, %.6f".format(location.latitude, location.longitude)
 
         override val detail: String
-            get() {
-                val loc = result.lastLocation ?: return timeFmt.format(timestamp)
-                return "\u00B1%.1fm \u00B7 %s".format(loc.accuracy, timeFmt.format(timestamp))
-            }
+            get() = "\u00B1%.1fm \u00B7 %s".format(location.accuracy, timeFmt.format(timestamp))
     }
 
     class Fence(

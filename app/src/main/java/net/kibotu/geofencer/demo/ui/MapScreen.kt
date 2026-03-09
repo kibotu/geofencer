@@ -5,21 +5,21 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -112,26 +112,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
         )
     }
 
-    var sheetVisible by remember { mutableStateOf(false) }
-    val sheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
-    )
-    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    val sheetPeekHeight = if (sheetVisible) 56.dp else 0.dp
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = sheetPeekHeight,
-        sheetDragHandle = if (sheetVisible) null else (@Composable {}),
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
+    Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        sheetContent = {
-            if (sheetVisible) {
-                EventLogSheet(
-                    entries = viewModel.logEntries,
-                    onClear = { viewModel.clearLog() },
-                )
-            }
-        },
     ) { contentPadding ->
         Box(Modifier.fillMaxSize()) {
             GoogleMap(
@@ -140,6 +127,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 properties = mapProperties,
                 uiSettings = mapUiSettings,
                 contentPadding = PaddingValues(
+                    top = statusBarTop,
                     bottom = contentPadding.calculateBottomPadding(),
                 ),
             ) {
@@ -159,6 +147,8 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
 
             FabColumn(
                 showLocationControls = hasLocationPermission,
+                isHighFrequency = viewModel.highFrequencyTracking,
+                onHighFrequencyToggle = viewModel::toggleHighFrequencyTracking,
                 onStyleClick = { showStylePicker = true },
                 onMyLocationClick = {
                     val latLng = viewModel.getLastKnownLatLng()
@@ -171,11 +161,14 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                     }
                 },
                 onToggleLogClick = {
-                    if (sheetVisible) {
-                        sheetVisible = false
+                    if (showBottomSheet) {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet = false
+                            }
+                        }
                     } else {
-                        sheetVisible = true
-                        scope.launch { sheetState.partialExpand() }
+                        showBottomSheet = true
                     }
                 },
                 onNewReminderClick = {
@@ -201,6 +194,18 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 onMessageChanged = { viewModel.updateMessage(it) },
                 onSubmit = { viewModel.submitGeofence() },
                 modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+        ) {
+            EventLogSheet(
+                entries = viewModel.logEntries,
+                onClear = { viewModel.clearLog() },
             )
         }
     }

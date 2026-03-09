@@ -1,4 +1,4 @@
-package net.kibotu.geofencer.geofencer
+package net.kibotu.geofencer.internal
 
 import android.Manifest
 import android.app.PendingIntent
@@ -10,40 +10,34 @@ import com.google.android.gms.location.Geofence.Builder
 import com.google.android.gms.location.Geofence.NEVER_EXPIRE
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import net.kibotu.geofencer.R
-import net.kibotu.geofencer.geofencer.models.Geofence
-import net.kibotu.geofencer.geofencer.service.GeofenceBroadcastReceiver
-import net.kibotu.geofencer.utils.loge
-import net.kibotu.geofencer.utils.sharedPreference
+import net.kibotu.geofencer.Geofence
 import timber.log.Timber
+import kotlin.time.Duration
 
 internal class GeofenceRepository(private val context: Context) {
 
+    private val mutex = Mutex()
     private val geofencingClient = LocationServices.getGeofencingClient(context)
+    private val prefs = context.getSharedPreferences(Prefs.GEOFENCE_PREFS, Context.MODE_PRIVATE)
 
     private val geofencePendingIntent: PendingIntent
         get() {
-            val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+            val intent = Intent(context, GeofenceReceiver::class.java)
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
-            return PendingIntent.getBroadcast(
-                context,
-                Geofencer.REQUEST_CODE,
-                intent,
-                flags
-            )
+            return PendingIntent.getBroadcast(context, Extras.REQUEST_CODE, intent, flags)
         }
 
-    var geofenceString by context.sharedPreference(Geofencer.PREFS_NAME, "")
-
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    suspend fun add(geofence: Geofence) {
+    suspend fun add(geofence: Geofence): Unit = mutex.withLock {
         val androidGeofence = buildGeofence(geofence)
         geofencingClient
             .addGeofences(buildGeofencingRequest(androidGeofence), geofencePendingIntent)
@@ -51,26 +45,27 @@ internal class GeofenceRepository(private val context: Context) {
         saveAll(getAll() + geofence)
     }
 
-    suspend fun remove(geofence: Geofence) {
+    suspend fun remove(geofence: Geofence): Unit = mutex.withLock {
         geofencingClient.removeGeofences(listOf(geofence.id)).await()
         saveAll(getAll() - geofence)
     }
 
-    suspend fun removeAll() {
+    suspend fun removeAll(): Unit = mutex.withLock {
         try {
             geofencingClient.removeGeofences(geofencePendingIntent).await()
         } catch (e: Exception) {
             Timber.e(e, "Failed to remove geofences from client")
         }
-        geofenceString = ""
+        saveAll(emptyList())
     }
 
-    fun get(requestId: String?) = getAll().firstOrNull { it.id == requestId }
+    fun get(requestId: String?): Geofence? = getAll().firstOrNull { it.id == requestId }
 
     fun getAll(): List<Geofence> {
-        if (geofenceString.isBlank()) return emptyList()
+        val json = prefs.getString(Prefs.GEOFENCE_KEY, null)
+        if (json.isNullOrBlank()) return emptyList()
         return try {
-            Json.decodeFromString<List<Geofence>>(geofenceString)
+            Json.decodeFromString<List<Geofence>>(json)
         } catch (e: Exception) {
             Timber.e(e, "Failed to decode geofences")
             emptyList()
@@ -78,50 +73,71 @@ internal class GeofenceRepository(private val context: Context) {
     }
 
     private fun saveAll(geofences: List<Geofence>) {
-        geofenceString = Json.encodeToString(geofences)
+        prefs.edit()
+            .putString(Prefs.GEOFENCE_KEY, Json.encodeToString(geofences))
+            .apply()
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     suspend fun reAddAll() {
-        val geofences = getAll()
-        removeAll()
-        geofences.forEach { geofence ->
+        val saved = getAll()
+        if (saved.isEmpty()) return
+
+        try {
+            geofencingClient.removeGeofences(geofencePendingIntent).await()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to remove geofences during re-registration")
+        }
+
+        for (geofence in saved) {
             try {
-                add(geofence)
+                val androidGeofence = buildGeofence(geofence)
+                geofencingClient
+                    .addGeofences(buildGeofencingRequest(androidGeofence), geofencePendingIntent)
+                    .await()
             } catch (e: Exception) {
-                loge("Failed to re-add geofence ${geofence.id}: ${e.message}")
+                Timber.e(e, "Failed to re-register geofence ${geofence.id}")
             }
         }
     }
 
     private fun buildGeofence(geofence: Geofence): com.google.android.gms.location.Geofence {
-        val defaultLoitering = context.resources.getInteger(R.integer.loitering_delay)
-        val defaultResponsiveness = context.resources.getInteger(R.integer.notification_responsiveness)
-
         return Builder()
             .setRequestId(geofence.id)
             .setLoiteringDelay(
-                if (geofence.loiteringDelayMillis >= 0) geofence.loiteringDelayMillis.toInt()
-                else defaultLoitering
+                geofence.loiteringDelay.takeIf { it > Duration.ZERO }
+                    ?.inWholeMilliseconds?.toInt()
+                    ?: DEFAULT_LOITERING_DELAY_MS
             )
             .setNotificationResponsiveness(
-                if (geofence.responsivenessMillis >= 0) geofence.responsivenessMillis.toInt()
-                else defaultResponsiveness
+                geofence.responsiveness.takeIf { it > Duration.ZERO }
+                    ?.inWholeMilliseconds?.toInt()
+                    ?: DEFAULT_RESPONSIVENESS_MS
             )
             .setCircularRegion(
                 geofence.latitude,
                 geofence.longitude,
                 geofence.radius.toFloat()
             )
-            .setTransitionTypes(geofence.transitions)
-            .setExpirationDuration(NEVER_EXPIRE)
+            .setTransitionTypes(geofence.transitionBitmask())
+            .setExpirationDuration(
+                if (geofence.expiration.isInfinite()) NEVER_EXPIRE
+                else geofence.expiration.inWholeMilliseconds
+            )
             .build()
     }
 
-    private fun buildGeofencingRequest(geofence: com.google.android.gms.location.Geofence): GeofencingRequest {
+    private fun buildGeofencingRequest(
+        geofence: com.google.android.gms.location.Geofence,
+    ): GeofencingRequest {
         return GeofencingRequest.Builder()
             .setInitialTrigger(0)
             .addGeofences(listOf(geofence))
             .build()
+    }
+
+    companion object {
+        private const val DEFAULT_LOITERING_DELAY_MS = 30_000
+        private const val DEFAULT_RESPONSIVENESS_MS = 300_000
     }
 }
