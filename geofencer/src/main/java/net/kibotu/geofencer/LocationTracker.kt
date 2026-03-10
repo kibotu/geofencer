@@ -29,16 +29,19 @@ object LocationTracker {
         val config = LocationConfig().apply(block)
         val appContext = context.applicationContext
 
-        if (config.actionClass.isNotEmpty()) {
-            appContext.getSharedPreferences(Prefs.LOCATION_PREFS, Context.MODE_PRIVATE)
-                .edit()
-                .putString(Prefs.LOCATION_ACTION_KEY, config.actionClass)
-                .apply()
-        }
+        appContext.getSharedPreferences(Prefs.LOCATION_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .apply {
+                if (config.actionClass.isNotEmpty()) {
+                    putString(Prefs.LOCATION_ACTION_KEY, config.actionClass)
+                }
+                putFloat(Prefs.LOCATION_MAX_ACCURACY_KEY, config.maxAccuracyMeters)
+            }
+            .apply()
 
         val request = LocationRequest.Builder(config.priority, config.interval.inWholeMilliseconds)
             .setMinUpdateIntervalMillis(config.fastest.inWholeMilliseconds)
-            .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+            .setGranularity(Granularity.GRANULARITY_FINE)
             .setMaxUpdateDelayMillis(config.maxDelay.inWholeMilliseconds)
             .setWaitForAccurateLocation(true)
             .setMinUpdateDistanceMeters(config.displacement)

@@ -5,6 +5,7 @@ internal object Prefs {
     const val GEOFENCE_KEY = "geofences_json"
     const val LOCATION_PREFS = "net.kibotu.geofencer.LocationTracker"
     const val LOCATION_ACTION_KEY = "location_action_class"
+    const val LOCATION_MAX_ACCURACY_KEY = "location_max_accuracy_meters"
 }
 
 internal object Extras {

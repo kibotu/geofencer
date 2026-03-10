@@ -75,6 +75,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     var markerToRemove by mutableStateOf<Geofence?>(null)
         private set
 
+    var bestAccuracyMeters by mutableStateOf(Float.MAX_VALUE)
+        private set
+
     var showSearch by mutableStateOf(false)
         private set
 
@@ -146,6 +149,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private fun collectLocationUpdates() {
         viewModelScope.launch {
             LocationTracker.locations.collect { location ->
+                if (location.hasAccuracy() && location.accuracy < bestAccuracyMeters) {
+                    bestAccuracyMeters = location.accuracy
+                }
                 _logEntries.add(0, LogEntry.LocationUpdate(location))
                 trimLog()
             }
@@ -189,18 +195,17 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         LocationTracker.stop(context)
         LocationTracker.start(context) {
             action<LocationLogAction>()
+            priority = Priority.PRIORITY_HIGH_ACCURACY
             if (highFrequencyTracking) {
                 interval = 5.seconds
                 fastest = 2.seconds
                 maxDelay = 10.seconds
                 displacement = 0f
-                priority = Priority.PRIORITY_HIGH_ACCURACY
             } else {
                 interval = 60.seconds
                 fastest = 30.seconds
                 maxDelay = 120.seconds
                 displacement = 50f
-                priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
             }
         }.onFailure { Timber.e(it, "Failed to start location updates") }
     }
@@ -221,7 +226,12 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     bestLocation = l
                 }
             }
-            bestLocation?.let { LatLng(it.latitude, it.longitude) }
+            bestLocation?.let { loc ->
+                if (loc.hasAccuracy() && loc.accuracy < bestAccuracyMeters) {
+                    bestAccuracyMeters = loc.accuracy
+                }
+                LatLng(loc.latitude, loc.longitude)
+            }
         } catch (_: SecurityException) {
             null
         }
@@ -249,14 +259,18 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    val minRadiusMeters: Double
+        get() = if (bestAccuracyMeters < Float.MAX_VALUE) bestAccuracyMeters.toDouble() else 10.0
+
     fun confirmLocation(latLng: LatLng) {
-        wizardState = WizardState.PickRadius(latLng = latLng)
+        val initialRadius = maxOf(500.0, minRadiusMeters)
+        wizardState = WizardState.PickRadius(latLng = latLng, radius = initialRadius)
     }
 
     fun updateRadius(radius: Double) {
         val state = wizardState
         if (state is WizardState.PickRadius) {
-            wizardState = state.copy(radius = radius)
+            wizardState = state.copy(radius = maxOf(radius, minRadiusMeters))
         }
     }
 

@@ -204,6 +204,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
 
             GeofenceWizardOverlay(
                 state = viewModel.wizardState,
+                minRadius = viewModel.minRadiusMeters,
                 onConfirmLocation = {
                     val ws = viewModel.wizardState
                     val target = if (ws is WizardState.PickLocation && ws.latLng != null) {

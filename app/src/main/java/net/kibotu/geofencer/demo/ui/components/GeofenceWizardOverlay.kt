@@ -39,6 +39,7 @@ fun GeofenceWizardOverlay(
     onSubmit: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    minRadius: Double = 10.0,
 ) {
     AnimatedVisibility(
         visible = state !is WizardState.Hidden,
@@ -65,6 +66,7 @@ fun GeofenceWizardOverlay(
                     )
                     is WizardState.PickRadius -> RadiusStep(
                         radius = state.radius,
+                        minRadius = minRadius,
                         onRadiusChanged = onRadiusChanged,
                         onConfirm = onConfirmRadius,
                         onCancel = onCancel,
@@ -99,6 +101,7 @@ private fun LocationStep(onConfirm: () -> Unit, onCancel: () -> Unit) {
 @Composable
 private fun RadiusStep(
     radius: Double,
+    minRadius: Double,
     onRadiusChanged: (Double) -> Unit,
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
@@ -108,11 +111,13 @@ private fun RadiusStep(
         style = MaterialTheme.typography.titleMedium,
     )
 
-    val sliderPosition = ((radius - 10.0) / 990.0).coerceIn(0.0, 1.0).toFloat()
+    val effectiveMin = maxOf(minRadius, 10.0)
+    val range = 1000.0 - effectiveMin
+    val sliderPosition = ((radius - effectiveMin) / range).coerceIn(0.0, 1.0).toFloat()
     Slider(
         value = sliderPosition,
         onValueChange = { progress ->
-            val r = 10.0 + progress.toDouble() * 990.0
+            val r = effectiveMin + progress.toDouble() * range
             onRadiusChanged(r)
         },
         valueRange = 0f..1f,
@@ -121,8 +126,16 @@ private fun RadiusStep(
     Text(
         text = stringResource(R.string.radius_description, radius.roundToInt().toString()),
         style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(bottom = 16.dp),
+        modifier = if (minRadius <= 10.0) Modifier.padding(bottom = 16.dp) else Modifier,
     )
+    if (minRadius > 10.0) {
+        Text(
+            text = stringResource(R.string.radius_min_accuracy, minRadius.roundToInt().toString()),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 16.dp),
+        )
+    }
     ButtonRow(onConfirm = onConfirm, onCancel = onCancel)
 }
 

@@ -11,6 +11,7 @@
     <string name="error_required">Required</string>
     <string name="message_hint">We arrived! :]</string>
     <string name="radius_description">%1$s meters</string>
+    <string name="radius_min_accuracy">Minimum %1$s m (based on GPS accuracy)</string>
 
     <string name="reminder_removal_alert">Remove geofence?</string>
     <string name="reminder_removal_alert_positive">OK</string>

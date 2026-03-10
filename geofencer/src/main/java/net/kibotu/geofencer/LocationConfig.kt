@@ -11,6 +11,8 @@ class LocationConfig {
     var maxDelay: Duration = 30.seconds
     var displacement: Float = 0f
     var priority: Int = Priority.PRIORITY_HIGH_ACCURACY
+    /** Drop location updates with accuracy worse (higher) than this value in meters. 0 = no filter. */
+    var maxAccuracyMeters: Float = 0f
     @PublishedApi internal var actionClass: String = ""
 
     inline fun <reified T : LocationAction> action() {
