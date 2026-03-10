@@ -132,6 +132,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                         geofenceId = event.geofence.id,
                         geofenceLabel = event.geofence.label.ifEmpty { event.geofence.message },
                         transition = event.transition.name,
+                        geofenceLatitude = event.geofence.latitude,
+                        geofenceLongitude = event.geofence.longitude,
+                        geofenceRadius = event.geofence.radius,
                     )
                     BreachMarkerRepository.add(getApplication(), marker)
                     breachMarkers = BreachMarkerRepository.getAll(getApplication())

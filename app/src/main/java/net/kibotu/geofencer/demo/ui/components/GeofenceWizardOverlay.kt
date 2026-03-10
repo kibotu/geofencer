@@ -108,15 +108,14 @@ private fun RadiusStep(
         style = MaterialTheme.typography.titleMedium,
     )
 
-    val sliderPosition = ((radius - 100.0) / 200.0 - 0.5).coerceIn(0.0, 4.0).toFloat()
+    val sliderPosition = ((radius - 10.0) / 990.0).coerceIn(0.0, 1.0).toFloat()
     Slider(
         value = sliderPosition,
         onValueChange = { progress ->
-            val r = 100 + (2 * progress.toDouble() + 1) * 100
+            val r = 10.0 + progress.toDouble() * 990.0
             onRadiusChanged(r)
         },
-        valueRange = 0f..4f,
-        steps = 3,
+        valueRange = 0f..1f,
         modifier = Modifier.padding(vertical = 8.dp),
     )
     Text(

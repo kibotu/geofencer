@@ -15,6 +15,9 @@ data class BreachMarker(
     val geofenceLabel: String,
     val transition: String,
     val timestampMillis: Long = System.currentTimeMillis(),
+    val geofenceLatitude: Double = 0.0,
+    val geofenceLongitude: Double = 0.0,
+    val geofenceRadius: Double = 0.0,
 )
 
 object BreachMarkerRepository {

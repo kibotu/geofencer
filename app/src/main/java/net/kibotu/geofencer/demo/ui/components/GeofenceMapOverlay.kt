@@ -26,6 +26,12 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import net.kibotu.geofencer.demo.R
 import net.kibotu.geofencer.demo.kotlin.BreachMarker
 import net.kibotu.geofencer.Geofence
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+
+private const val EARTH_RADIUS_METERS = 6_371_000.0
 
 private val geofenceStroke = Color(0xFF2594E4)
 private val geofenceFill = Color(0x4008AB91)
@@ -65,7 +71,15 @@ private enum class BreachType(val tag: String, val snippet: String, val color: I
 @Composable
 fun BreachMarkerContent(breach: BreachMarker) {
     val context = LocalContext.current
-    val position = LatLng(breach.latitude, breach.longitude)
+    val position = if (breach.geofenceRadius > 0.0) {
+        projectOntoFence(
+            center = LatLng(breach.geofenceLatitude, breach.geofenceLongitude),
+            detected = LatLng(breach.latitude, breach.longitude),
+            radiusMeters = breach.geofenceRadius,
+        )
+    } else {
+        LatLng(breach.latitude, breach.longitude)
+    }
     val type = when {
         breach.transition.equals("Enter", ignoreCase = true) -> BreachType.ENTER
         breach.transition.equals("Dwell", ignoreCase = true) -> BreachType.DWELL
@@ -121,6 +135,42 @@ fun DraggableWizardMarker(
         strokeColor = geofenceStroke,
         fillColor = geofenceFill,
     )
+}
+
+/**
+ * Projects a detected location onto the geofence circle perimeter along the
+ * bearing from [center] to [detected], returning the point at [radiusMeters]
+ * from the center in that direction. Falls back to [detected] when center and
+ * detected coincide (bearing is undefined).
+ */
+private fun projectOntoFence(
+    center: LatLng,
+    detected: LatLng,
+    radiusMeters: Double,
+): LatLng {
+    val lat1 = Math.toRadians(center.latitude)
+    val lon1 = Math.toRadians(center.longitude)
+    val lat2 = Math.toRadians(detected.latitude)
+    val lon2 = Math.toRadians(detected.longitude)
+    val dLon = lon2 - lon1
+
+    val y = sin(dLon) * cos(lat2)
+    val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+    val bearing = atan2(y, x)
+
+    if (x == 0.0 && y == 0.0) return detected
+
+    val angularDistance = radiusMeters / EARTH_RADIUS_METERS
+    val destLat = asin(
+        sin(lat1) * cos(angularDistance) +
+            cos(lat1) * sin(angularDistance) * cos(bearing),
+    )
+    val destLon = lon1 + atan2(
+        sin(bearing) * sin(angularDistance) * cos(lat1),
+        cos(angularDistance) - sin(lat1) * sin(destLat),
+    )
+
+    return LatLng(Math.toDegrees(destLat), Math.toDegrees(destLon))
 }
 
 @Composable

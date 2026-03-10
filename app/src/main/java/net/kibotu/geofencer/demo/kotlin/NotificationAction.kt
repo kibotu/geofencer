@@ -25,6 +25,9 @@ class NotificationAction : GeofenceAction() {
                 geofenceId = event.geofence.id,
                 geofenceLabel = event.geofence.label,
                 transition = event.transition.name,
+                geofenceLatitude = event.geofence.latitude,
+                geofenceLongitude = event.geofence.longitude,
+                geofenceRadius = event.geofence.radius,
             )
             BreachMarkerRepository.add(context, marker)
             Timber.d("Persisted breach marker at ${marker.latitude}, ${marker.longitude}")
