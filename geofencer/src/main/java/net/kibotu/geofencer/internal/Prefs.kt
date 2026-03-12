@@ -6,6 +6,9 @@ internal object Prefs {
     const val LOCATION_PREFS = "net.kibotu.geofencer.LocationTracker"
     const val LOCATION_ACTION_KEY = "location_action_class"
     const val LOCATION_MAX_ACCURACY_KEY = "location_max_accuracy_meters"
+    const val LOCATION_MAX_SPEED_KEY = "location_max_speed_mps"
+    const val LOCATION_ACCURACY_WEIGHTED_KEY = "location_accuracy_weighted_filter"
+    const val LOCATION_MIN_NETWORK_ACCURACY_KEY = "location_min_network_accuracy"
 }
 
 internal object Extras {

@@ -9,6 +9,7 @@ Convenience library to receive user location updates and geofence events with mi
 ## Table of Contents
 
 - [Features](#features)
+- [Location Filtering](#location-filtering)
 - [Installation](#installation)
 - [Initialization](#initialization)
 - [Quick Start](#quick-start)
@@ -32,6 +33,23 @@ Convenience library to receive user location updates and geofence events with mi
 - Configurable update intervals, displacement, and priority
 - Custom actions for geofence and location events
 - minSdk 23, targets Android 15+
+
+## Location Filtering
+
+Raw GPS is noisy — especially indoors, where fixes can drift hundreds of meters. The library runs every location update through a filtering pipeline before it reaches your code or triggers a geofence event.
+
+```
+FusedLocationProvider
+  → Accuracy gate         — reject fixes worse than a threshold
+  → Speed check           — reject teleportation (configurable m/s cap)
+  → Accuracy-weighted     — ignore movement within the error radius
+  → Provider quality      — reject garbage network-provider fixes
+  → Consistency buffer    — require N consecutive samples before flipping state
+  → Dwell confirmation    — require the device to *stay* before emitting
+  → Event deduplication   — prevent double-fires from Play Services + client-side
+```
+
+All filters have sensible defaults and are configurable via `LocationConfig` and `GeofenceBuilder`. Unfiltered data is still available via `LocationTracker.rawLocations`.
 
 ## Installation
 

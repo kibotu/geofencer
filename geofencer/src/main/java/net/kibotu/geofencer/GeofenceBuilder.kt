@@ -1,7 +1,9 @@
 package net.kibotu.geofencer
 
+import timber.log.Timber
 import java.util.UUID
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @DslMarker
 annotation class GeofencerDsl
@@ -18,6 +20,9 @@ class GeofenceBuilder {
     var loiteringDelay: Duration = Duration.ZERO
     var responsiveness: Duration = Duration.ZERO
     var expiration: Duration = Duration.INFINITE
+    var consistentSamples: Int = 3
+    var enterDwellDuration: Duration = 30.seconds
+    var exitDwellDuration: Duration = 30.seconds
     @PublishedApi internal var actionClass: String = ""
 
     inline fun <reified T : GeofenceAction> action() {
@@ -29,6 +34,16 @@ class GeofenceBuilder {
         require(latitude in -90.0..90.0) { "Latitude must be in [-90, 90], was $latitude" }
         require(longitude in -180.0..180.0) { "Longitude must be in [-180, 180], was $longitude" }
         require(transitions.isNotEmpty()) { "At least one transition must be specified" }
+
+        if (radius < 50.0) {
+            Timber.w(
+                "Geofence '%s' has radius %.0fm. Radii below 50m are unreliable indoors. " +
+                    "Consider 100-150m for indoor use.",
+                label.ifEmpty { id },
+                radius,
+            )
+        }
+
         return Geofence(
             id = id,
             latitude = latitude,
@@ -41,6 +56,9 @@ class GeofenceBuilder {
             loiteringDelay = loiteringDelay,
             responsiveness = responsiveness,
             expiration = expiration,
+            consistentSamples = consistentSamples,
+            enterDwellDuration = enterDwellDuration,
+            exitDwellDuration = exitDwellDuration,
         )
     }
 }

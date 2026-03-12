@@ -5,6 +5,7 @@ import com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER
 import com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT
 import kotlinx.serialization.Serializable
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class Geofence(
@@ -22,6 +23,11 @@ data class Geofence(
     val responsiveness: kotlin.time.Duration = kotlin.time.Duration.ZERO,
     @Serializable(with = DurationMillisSerializer::class)
     val expiration: kotlin.time.Duration = kotlin.time.Duration.INFINITE,
+    val consistentSamples: Int = 3,
+    @Serializable(with = DurationMillisSerializer::class)
+    val enterDwellDuration: kotlin.time.Duration = 30.seconds,
+    @Serializable(with = DurationMillisSerializer::class)
+    val exitDwellDuration: kotlin.time.Duration = 30.seconds,
 ) {
 
     @Serializable

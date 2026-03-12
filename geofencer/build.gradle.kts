@@ -46,6 +46,10 @@ android {
         ignoreWarnings = true
         quiet = true
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 java {
@@ -77,4 +81,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.work.runtime.ktx)
     implementation(libs.timber)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }

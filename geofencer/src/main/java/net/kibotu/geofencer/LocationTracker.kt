@@ -12,6 +12,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import net.kibotu.geofencer.internal.LocationHistory
 import net.kibotu.geofencer.internal.LocationReceiver
 import net.kibotu.geofencer.internal.Prefs
 import timber.log.Timber
@@ -22,12 +23,19 @@ object LocationTracker {
 
     internal val mutableLocations = MutableSharedFlow<Location>(extraBufferCapacity = 64)
     internal val mutableRawResults = MutableSharedFlow<LocationResult>(extraBufferCapacity = 64)
+    internal val history = LocationHistory()
 
+    /** Filtered location stream — noisy / implausible updates are rejected before emission. */
     val locations: SharedFlow<Location> = mutableLocations.asSharedFlow()
+
+    /** Raw, unfiltered location results straight from FusedLocationProvider. */
+    val rawLocations: SharedFlow<LocationResult> = mutableRawResults.asSharedFlow()
 
     fun start(context: Context, block: LocationConfig.() -> Unit = {}): Result<Unit> = runCatching {
         val config = LocationConfig().apply(block)
         val appContext = context.applicationContext
+
+        history.clear()
 
         appContext.getSharedPreferences(Prefs.LOCATION_PREFS, Context.MODE_PRIVATE)
             .edit()
@@ -36,6 +44,9 @@ object LocationTracker {
                     putString(Prefs.LOCATION_ACTION_KEY, config.actionClass)
                 }
                 putFloat(Prefs.LOCATION_MAX_ACCURACY_KEY, config.maxAccuracyMeters)
+                putFloat(Prefs.LOCATION_MAX_SPEED_KEY, config.maxSpeedMps)
+                putBoolean(Prefs.LOCATION_ACCURACY_WEIGHTED_KEY, config.accuracyWeightedFilterEnabled)
+                putFloat(Prefs.LOCATION_MIN_NETWORK_ACCURACY_KEY, config.minNetworkProviderAccuracy)
             }
             .apply()
 

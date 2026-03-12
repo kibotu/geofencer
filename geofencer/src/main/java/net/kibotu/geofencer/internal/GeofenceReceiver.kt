@@ -44,6 +44,9 @@ class GeofenceReceiver : BroadcastReceiver() {
                 transition = transition,
                 triggeringLocation = latLng,
             )
+
+            if (!GeofenceEvaluationState.deduplicator.shouldEmit(event)) continue
+
             Geofencer.mutableEvents.tryEmit(event)
 
             if (geofence.actionClass.isNotEmpty()) {
